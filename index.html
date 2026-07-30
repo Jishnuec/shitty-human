@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<!--
+  Shitty Human — a 2-person daily rating tracker
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shitty Human — rate your day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito+Sans:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #180F2E;
+    --ink-2: #120A24;
+    --velvet: #2B2150;
+    --velvet-light: #3A2D6B;
+    --velvet-border: #4A3B7A;
+    --marigold: #FFB627;
+    --marigold-glow: rgba(255,182,39,.35);
+    --coral: #FF6B5E;
+    --coral-glow: rgba(255,107,94,.35);
+    --mint: #4ADE9E;
+    --rose: #FF5D8F;
+    --gold: #FFD23F;
+    --cloud: #F7F3ED;
+    --cloud-dim: #C9C2D9;
+    --cloud-faint: #8B82A8;
+    --font-display: 'Fredoka', sans-serif;
+    --font-body: 'Nunito Sans', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --radius: 20px;
+    --radius-sm: 13px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0; padding: 0; min-height: 100%;
+    background: radial-gradient(ellipse 900px 600px at 50% -10%, var(--velvet) 0%, var(--ink) 55%, var(--ink-2) 100%);
+    color: var(--cloud);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body { position: relative; overflow-x: hidden; min-height: 100vh; }
+
+  h1, h2, h3, .display { font-family: var(--font-display); font-weight: 600; margin: 0; }
+
+  button { font-family: inherit; cursor: pointer; }
+  input, textarea { font-family: inherit; }
+
+  a { color: var(--marigold); }
+
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  code {
+    background: var(--ink-2);
+    border: 1px solid var(--velvet-border);
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: .9em;
+  }
+
+  /* ---------- ambient background orbs ---------- */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: .35;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb-1 { width: 320px; height: 320px; top: -80px; left: -60px; background: var(--marigold); }
+  .orb-2 { width: 380px; height: 380px; top: 20%; right: -120px; background: var(--coral); }
+  .orb-3 { width: 260px; height: 260px; bottom: -60px; left: 30%; background: var(--mint); opacity: .18; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .orb-1 { animation: driftA 24s ease-in-out infinite alternate; }
+    .orb-2 { animation: driftB 28s ease-in-out infinite alternate; }
+    .orb-3 { animation: driftC 32s ease-in-out infinite alternate; }
+  }
+  @keyframes driftA { to { transform: translate(50px,40px) scale(1.15); } }
+  @keyframes driftB { to { transform: translate(-60px,50px) scale(1.1); } }
+  @keyframes driftC { to { transform: translate(40px,-40px) scale(.95); } }
+
+  .wrap { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: 24px 18px 64px; }
+
+  [hidden] { display: none !important; }
+
+  /* ---------- auth screen ---------- */
+  .auth-shell { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 18px; position: relative; z-index: 1; }
+  .auth-card {
+    width: 100%; max-width: 400px;
+    background: var(--velvet);
+    border: 1px solid var(--velvet-border);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    box-shadow: 0 30px 60px rgba(0,0,0,.35);
+  }
+  .auth-logo { text-align: center; margin-bottom: 4px; font-size: 34px; }
+  .auth-title { text-align: center; font-size: 28px; margin-bottom: 4px; }
+  .auth-subtitle { text-align: center; color: var(--cloud-dim); font-size: 14px; margin-bottom: 24px; }
+
+  .auth-tabs { display: flex; background: var(--ink-2); border-radius: 999px; padding: 4px; margin-bottom: 22px; }
+  .auth-tab {
+    flex: 1; border: none; background: transparent; color: var(--cloud-dim);
+    padding: 10px 0; border-radius: 999px; font-weight: 700; font-size: 14px;
+    transition: background .2s, color .2s;
+  }
+  .auth-tab.active { background: var(--marigold); color: #3A2400; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 700; color: var(--cloud-dim); margin-bottom: 6px; }
+  .field input, .field textarea {
+    width: 100%; background: var(--ink-2); border: 1px solid var(--velvet-border);
+    color: var(--cloud); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 15px;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--marigold); }
+  .field-hint { font-size: 12px; color: var(--cloud-faint); margin-top: 5px; }
+
+  .btn-primary {
+    width: 100%; border: none; border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--marigold), #FFCB6B);
+    color: #3A2400; font-weight: 700; font-size: 15px; padding: 13px 0;
+    transition: transform .12s ease, box-shadow .12s ease;
+    box-shadow: 0 8px 20px var(--marigold-glow);
+  }
+  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0) scale(.98); }
+  .btn-primary:disabled { opacity: .6; cursor: default; transform: none; }
+
+  .auth-error {
+    background: rgba(255,93,143,.12); border: 1px solid var(--rose); color: #FFC2D4;
+    border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; margin-bottom: 16px;
+  }
+  .auth-loading { text-align: center; font-size: 13px; color: var(--cloud-dim); margin-top: 12px; }
+
+  .setup-needed { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; position: relative; z-index: 1; }
+  .setup-card {
+    max-width: 480px; background: var(--velvet); border: 1px solid var(--velvet-border);
+    border-radius: var(--radius); padding: 32px; text-align: center;
+  }
+  .setup-card h1 { font-size: 22px; margin-bottom: 12px; }
+  .setup-card p { color: var(--cloud-dim); line-height: 1.6; font-size: 14px; }
+
+  /* ---------- app shell ---------- */
+  .app-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 2px 20px;
+  }
+  .app-wordmark { display: flex; align-items: center; gap: 8px; font-size: 20px; }
+  .app-bar-right { display: flex; align-items: center; gap: 8px; }
+  .player-chip {
+    font-family: var(--font-mono); font-size: 12px; color: var(--cloud-dim);
+    background: var(--velvet); border: 1px solid var(--velvet-border);
+    padding: 6px 12px; border-radius: 999px;
+  }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--velvet-border);
+    background: var(--velvet); color: var(--cloud); font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .icon-btn:hover { background: var(--velvet-light); }
+
+  .tab-bar { display: flex; gap: 8px; margin-bottom: 24px; }
+  .tab-btn {
+    flex: 1; border: 1px solid var(--velvet-border); background: var(--velvet);
+    color: var(--cloud-dim); padding: 11px 6px; border-radius: var(--radius-sm);
+    font-weight: 700; font-size: 13px; transition: all .15s;
+  }
+  .tab-btn.active { background: var(--marigold); color: #3A2400; border-color: var(--marigold); }
+
+  .panel { animation: panelIn .25s ease; }
+  @keyframes panelIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
+
+  .card {
+    background: var(--velvet); border: 1px solid var(--velvet-border);
+    border-radius: var(--radius); padding: 22px; margin-bottom: 18px;
+  }
+  .card h2 { font-size: 17px; margin-bottom: 14px; }
+  .card h2 .sub { font-family: var(--font-body); font-weight: 400; font-size: 12px; color: var(--cloud-faint); display: block; margin-top: 2px; }
+
+  /* ---------- rate today ---------- */
+  .rate-date { text-align: center; color: var(--cloud-dim); font-size: 13px; margin-bottom: 18px; }
+  .rate-emoji-display { text-align: center; margin-bottom: 20px; }
+  #bigEmoji { font-size: 64px; line-height: 1; display: block; margin-bottom: 6px; transition: transform .15s; }
+  #bigEmojiLabel { font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--cloud-dim); }
+
+  .rating-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 18px; }
+  .rating-btn {
+    width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--velvet-border);
+    background: var(--ink-2); color: var(--cloud-dim); font-family: var(--font-mono); font-weight: 700; font-size: 15px;
+    transition: all .12s;
+  }
+  .rating-btn:hover { border-color: var(--marigold); color: var(--cloud); }
+  .rating-btn.selected {
+    background: linear-gradient(135deg, var(--marigold), #FFCB6B); color: #3A2400;
+    border-color: var(--marigold); transform: scale(1.12);
+    box-shadow: 0 6px 16px var(--marigold-glow);
+  }
+
+  .note-field textarea { resize: vertical; min-height: 64px; }
+
+  .already-rated-note {
+    text-align: center; font-size: 12px; color: var(--gold); margin-bottom: 14px;
+  }
+
+  .reaction-card {
+    margin-top: 16px; padding: 14px 18px; border-radius: var(--radius-sm);
+    background: var(--velvet-light); border: 1px solid var(--velvet-border);
+    font-family: var(--font-display); font-weight: 500; font-size: 14px; text-align: center;
+    opacity: 0; transform: translateY(8px); pointer-events: none;
+    transition: opacity .3s ease, transform .3s ease;
+  }
+  .reaction-card.show { opacity: 1; transform: translateY(0); }
+  .reaction-card.rough { border-color: var(--rose); box-shadow: 0 0 20px rgba(255,93,143,.22); }
+  .reaction-card.meh { border-color: var(--coral); }
+  .reaction-card.good { border-color: var(--mint); box-shadow: 0 0 20px rgba(74,222,158,.18); }
+  .reaction-card.amazing { border-color: var(--gold); box-shadow: 0 0 24px rgba(255,210,63,.3); }
+
+  @keyframes shake {
+    10%,90% { transform: translateX(-2px); } 20%,80% { transform: translateX(4px); }
+    30%,50%,70% { transform: translateX(-8px); } 40%,60% { transform: translateX(8px); }
+  }
+  .shake { animation: shake .5s; }
+  .flash { outline: 2px solid var(--rose); }
+
+  /* ---------- confetti ---------- */
+  .confetti-piece { position: fixed; top: -12px; width: 8px; height: 14px; opacity: .95; pointer-events: none; z-index: 9999; animation: confettiFall linear forwards; }
+  @keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+  /* ---------- stats ---------- */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 12px; margin-bottom: 18px; }
+  .stat-box { background: var(--ink-2); border: 1px solid var(--velvet-border); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
+  .stat-box .label { font-size: 11px; color: var(--cloud-faint); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  .stat-box .value { font-family: var(--font-mono); font-weight: 700; font-size: 20px; color: var(--cloud); }
+  .stat-box .value.small { font-size: 13px; font-weight: 400; }
+
+  .chart-box { position: relative; width: 100%; height: 240px; }
+  .chart-box.sm { height: 200px; }
+  .chart-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 16px; }
+
+  .history-list { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow-y: auto; }
+  .history-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 6px;
+    border-bottom: 1px solid var(--velvet-border);
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-emoji { font-size: 22px; width: 30px; text-align: center; flex-shrink: 0; }
+  .history-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .history-date { font-size: 13px; font-weight: 700; color: var(--cloud); }
+  .history-note { font-size: 12px; color: var(--cloud-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .history-rating { font-family: var(--font-mono); font-weight: 700; color: var(--marigold); flex-shrink: 0; }
+
+  .empty-state { text-align: center; padding: 30px 10px; color: var(--cloud-dim); font-size: 14px; }
+  .empty-state .emoji { font-size: 34px; display: block; margin-bottom: 10px; }
+  .loading-state { text-align: center; padding: 30px 10px; color: var(--cloud-faint); font-size: 13px; }
+
+  /* ---------- compare / VS ---------- */
+  .vs-header { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 22px; flex-wrap: wrap; }
+  .player-badge { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .badge-avatar {
+    width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 22px; font-weight: 600;
+  }
+  .badge-a .badge-avatar { background: linear-gradient(135deg, var(--marigold), #FFCB6B); color: #3A2400; box-shadow: 0 0 22px var(--marigold-glow); }
+  .badge-b .badge-avatar { background: linear-gradient(135deg, var(--coral), #FF9C8F); color: #4A0F09; box-shadow: 0 0 22px var(--coral-glow); }
+  .badge-name { font-family: var(--font-display); font-weight: 600; font-size: 14px; }
+  .badge-stat { font-family: var(--font-mono); font-size: 12px; color: var(--cloud-dim); }
+  .vs-divider { font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--gold); text-shadow: 0 0 16px rgba(255,210,63,.55); font-style: italic; transform: skewX(-6deg); }
+
+  .verdict-banner {
+    text-align: center; font-family: var(--font-display); font-weight: 500; font-size: 14px;
+    background: var(--ink-2); border: 1px solid var(--velvet-border); border-radius: var(--radius-sm);
+    padding: 12px 16px; margin-bottom: 18px;
+  }
+
+  footer { text-align: center; color: var(--cloud-faint); font-size: 12px; padding: 10px 0 30px; position: relative; z-index: 1; }
+
+  @media (max-width: 420px) {
+    .auth-card { padding: 26px 20px; }
+    .rating-btn { width: 38px; height: 38px; font-size: 14px; }
+    #bigEmoji { font-size: 54px; }
+    .badge-avatar { width: 54px; height: 54px; font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- ================= SETUP NEEDED ================= -->
+<div id="setupNeeded" class="setup-needed" hidden>
+  <div class="setup-card">
+    <h1>⚙️ One quick step left</h1>
+    <p>This app needs your Firebase config. Open this file, find <code>firebaseConfig</code> near the top of the script section, and paste in your project's keys — full steps are in the setup guide.</p>
+  </div>
+</div>
+
+<!-- ================= AUTH SCREEN ================= -->
+<div id="authScreen" class="auth-shell" hidden>
+  <div class="auth-card">
+    <div class="auth-logo">💩</div>
+    <h1 class="auth-title">Shitty Human</h1>
+    <p class="auth-subtitle">Rate your day. Compare your shittiness.</p>
+
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" id="loginTabBtn">Log In</button>
+      <button type="button" class="auth-tab" id="signupTabBtn">Sign Up</button>
+    </div>
+
+    <div id="authError" class="auth-error" hidden></div>
+
+    <form id="loginForm" class="auth-form">
+      <div class="field">
+        <label for="loginUsername">Username</label>
+        <input id="loginUsername" type="text" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required />
+      </div>
+      <button type="submit" class="btn-primary auth-submit">Log In</button>
+    </form>
+
+    <form id="signupForm" class="auth-form" hidden>
+      <div class="field">
+        <label for="signupUsername">Username</label>
+        <input id="signupUsername" type="text" autocomplete="username" required />
+        <div class="field-hint">3–15 letters, numbers, or underscores</div>
+      </div>
+      <div class="field">
+        <label for="signupPassword">Password</label>
+        <input id="signupPassword" type="password" autocomplete="new-password" required />
+        <div class="field-hint">At least 6 characters</div>
+      </div>
+      <button type="submit" class="btn-primary auth-submit">Create Account</button>
+      <div class="field-hint" style="text-align:center; margin-top:12px;">Just for the two of you — open to the first 2 accounts only</div>
+    </form>
+
+    <div id="authLoadingText" class="auth-loading" hidden>One sec…</div>
+  </div>
+</div>
+
+<!-- ================= APP SCREEN ================= -->
+<div id="appScreen" hidden>
+  <div class="wrap">
+    <div class="app-bar">
+      <div class="app-wordmark">💩 <span>Shitty Human</span></div>
+      <div class="app-bar-right">
+        <span class="player-chip" id="appUsername">—</span>
+        <button class="icon-btn" id="muteBtn" type="button" aria-label="Mute sounds">🔊</button>
+        <button class="icon-btn" id="logoutBtn" type="button" aria-label="Log out">⏻</button>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" id="rateTabBtn" type="button">Rate Today</button>
+      <button class="tab-btn" id="statsTabBtn" type="button">My Stats</button>
+      <button class="tab-btn" id="compareTabBtn" type="button">Compare</button>
+    </div>
+
+    <!-- ---- RATE PANEL ---- -->
+    <section id="ratePanel" class="panel">
+      <div class="card">
+        <h2>How shitty was today?<span class="sub" id="rateDateLabel"></span></h2>
+        <div class="rate-emoji-display">
+          <span id="bigEmoji">❓</span>
+          <span id="bigEmojiLabel">Pick a number below</span>
+        </div>
+        <div class="rating-row" id="ratingRow"></div>
+        <div class="field note-field">
+          <label for="noteInput">Anything to remember about today? (optional)</label>
+          <textarea id="noteInput" maxlength="280" placeholder="Optional note…"></textarea>
+        </div>
+        <div class="already-rated-note" id="alreadyRatedNote" hidden>You've already rated today — pick a new number to update it.</div>
+        <button class="btn-primary" id="submitBtn" type="button" disabled>Log today's shittiness</button>
+        <div class="reaction-card" id="reactionCard"></div>
+      </div>
+    </section>
+
+    <!-- ---- STATS PANEL ---- -->
+    <section id="statsPanel" class="panel" hidden>
+      <div class="loading-state" id="statsLoading">Loading your stats…</div>
+      <div class="empty-state" id="statsEmpty" hidden>
+        <span class="emoji">📭</span>
+        No ratings yet — log today's vibe to get started.
+      </div>
+      <div id="statsContent" hidden>
+        <div class="card">
+          <div class="stat-grid">
+            <div class="stat-box"><div class="label">Average</div><div class="value" id="statAvg">—</div></div>
+            <div class="stat-box"><div class="label">Streak</div><div class="value" id="statStreak">—</div></div>
+            <div class="stat-box"><div class="label">Days logged</div><div class="value" id="statCount">—</div></div>
+            <div class="stat-box"><div class="label">Best day</div><div class="value small" id="statBest">—</div></div>
+            <div class="stat-box"><div class="label">Worst day</div><div class="value small" id="statWorst">—</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Your shittiness over time</h2>
+          <div class="chart-box"><canvas id="statsLineCanvas"></canvas></div>
+        </div>
+        <div class="card">
+          <h2>Your day breakdown</h2>
+          <div class="chart-box sm"><canvas id="statsDoughnutCanvas"></canvas></div>
+        </div>
+        <div class="card">
+          <h2>History</h2>
+          <ul class="history-list" id="historyList"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- COMPARE PANEL ---- -->
+    <section id="comparePanel" class="panel" hidden>
+      <div class="loading-state" id="compareLoading">Loading the head to head…</div>
+      <div class="empty-state" id="compareWaiting" hidden>
+        <span class="emoji">👋</span>
+        Waiting for the second person to sign up before you can compare.
+      </div>
+      <div id="compareContent" hidden>
+        <div class="card">
+          <div class="vs-header">
+            <div class="player-badge badge-a">
+              <div class="badge-avatar" id="badgeAInitial">A</div>
+              <div class="badge-name" id="badgeAName">—</div>
+              <div class="badge-stat" id="badgeAStat">—</div>
+            </div>
+            <div class="vs-divider">VS</div>
+            <div class="player-badge badge-b">
+              <div class="badge-avatar" id="badgeBInitial">B</div>
+              <div class="badge-name" id="badgeBName">—</div>
+              <div class="badge-stat" id="badgeBStat">—</div>
+            </div>
+          </div>
+          <div class="verdict-banner" id="compareVerdict">—</div>
+        </div>
+        <div class="card">
+          <h2>Shittiness over time</h2>
+          <div class="chart-box"><canvas id="compareLineCanvas"></canvas></div>
+        </div>
+        <div class="card">
+          <h2>Averages &amp; best days</h2>
+          <div class="chart-box sm"><canvas id="compareBarCanvas"></canvas></div>
+        </div>
+        <div class="card">
+          <h2>Day breakdowns</h2>
+          <div class="chart-grid-2">
+            <div>
+              <div class="chart-box sm"><canvas id="compareDoughnutACanvas"></canvas></div>
+            </div>
+            <div>
+              <div class="chart-box sm"><canvas id="compareDoughnutBCanvas"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <footer>Made with Shitty Human 💩 — just for the two of you</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.15.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.15.0/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.15.0/firebase-firestore-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+
+<script>
+(function () {
+  "use strict";
+
+  // ===================================================================
+  // ✅ FIREBASE CONFIG – filled in with your real values
+  // ===================================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyC2bwQtju5A9wNNLaz3DSF8nrpLPaPiRZg",
+    authDomain: "shitty-human.firebaseapp.com",
+    projectId: "shitty-human",
+    storageBucket: "shitty-human.firebasestorage.app",
+    messagingSenderId: "830380682290",
+    appId: "1:830380682290:web:6edb4bfbf582987b2b202b"
+  };
+
+  // Change this if you ever want to allow more than 2 people.
+  const MAX_USERS = 2;
+
+  const EMOJI_BY_RATING = {1:'😭',2:'😢',3:'😞',4:'😕',5:'😐',6:'🙂',7:'😊',8:'😄',9:'🤩',10:'🎉'};
+  const LABEL_BY_RATING = {1:'Terrible',2:'Really Bad',3:'Bad',4:'Meh',5:'Okay',6:'Decent',7:'Good',8:'Great',9:'Amazing',10:'Best Day Ever'};
+
+  const REACTION_CAPTIONS = {
+    rough: ["💀 Rough one. Tomorrow's a fresh start.", "🫠 Big yikes today. Rest up.", "🌧️ Certified bad day — it happens.", "😮‍💨 Tough one. Be kind to yourself."],
+    meh: ["😐 Perfectly mid. A very average day.", "🙃 Not amazing, not terrible.", "😬 Meh energy, noted.", "🤷 It happened, I guess."],
+    good: ["😄 Solid day! Nice work.", "✨ Good vibes confirmed.", "🙌 That's a certified good one.", "👍 Nailed it today."],
+    amazing: ["🎉 LEGENDARY DAY ALERT 🎉", "🚀 Absolutely thriving today.", "👑 Main character energy.", "🌟 Certified best-day vibes."]
+  };
+
+  const BUCKET_META = {
+    rough:   { label: 'Rough (1-3)',   color: '#FF5D8F' },
+    meh:     { label: 'Meh (4-6)',     color: '#FF8B6E' },
+    good:    { label: 'Good (7-8)',    color: '#4ADE9E' },
+    amazing: { label: 'Amazing (9-10)',color: '#FFD23F' }
+  };
+
+  function bucketFor(n) { if (n<=3) return 'rough'; if (n<=6) return 'meh'; if (n<=8) return 'good'; return 'amazing'; }
+  function playerColor(order) { return order === 0 ? '#FFB627' : '#FF6B5E'; }
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------------- element refs ----------------
+  const $ = (id) => document.getElementById(id);
+  const setupNeeded = $('setupNeeded'), authScreen = $('authScreen'), appScreen = $('appScreen');
+  const loginTabBtn = $('loginTabBtn'), signupTabBtn = $('signupTabBtn');
+  const loginForm = $('loginForm'), signupForm = $('signupForm');
+  const loginUsername = $('loginUsername'), loginPassword = $('loginPassword');
+  const signupUsername = $('signupUsername'), signupPassword = $('signupPassword');
+  const authError = $('authError'), authLoadingText = $('authLoadingText');
+  const appUsername = $('appUsername'), muteBtn = $('muteBtn'), logoutBtn = $('logoutBtn');
+  const rateTabBtn = $('rateTabBtn'), statsTabBtn = $('statsTabBtn'), compareTabBtn = $('compareTabBtn');
+  const ratePanel = $('ratePanel'), statsPanel = $('statsPanel'), comparePanel = $('comparePanel');
+  const rateDateLabel = $('rateDateLabel'), bigEmoji = $('bigEmoji'), bigEmojiLabel = $('bigEmojiLabel');
+  const ratingRow = $('ratingRow'), noteInput = $('noteInput'), submitBtn = $('submitBtn');
+  const alreadyRatedNote = $('alreadyRatedNote'), reactionCard = $('reactionCard');
+  const statsLoading = $('statsLoading'), statsEmpty = $('statsEmpty'), statsContent = $('statsContent');
+  const statAvg = $('statAvg'), statStreak = $('statStreak'), statCount = $('statCount');
+  const statBest = $('statBest'), statWorst = $('statWorst');
+  const statsLineCanvas = $('statsLineCanvas'), statsDoughnutCanvas = $('statsDoughnutCanvas');
+  const historyList = $('historyList');
+  const compareLoading = $('compareLoading'), compareWaiting = $('compareWaiting'), compareContent = $('compareContent');
+  const badgeAInitial = $('badgeAInitial'), badgeAName = $('badgeAName'), badgeAStat = $('badgeAStat');
+  const badgeBInitial = $('badgeBInitial'), badgeBName = $('badgeBName'), badgeBStat = $('badgeBStat');
+  const compareVerdict = $('compareVerdict');
+  const compareLineCanvas = $('compareLineCanvas'), compareBarCanvas = $('compareBarCanvas');
+  const compareDoughnutACanvas = $('compareDoughnutACanvas'), compareDoughnutBCanvas = $('compareDoughnutBCanvas');
+
+  let auth, db;
+  let currentUser = null, currentProfile = null;
+  let isSigningUp = false;
+  let selectedRating = null;
+  let soundEnabled = true;
+  let reactionTimeout = null;
+  let statsChart = null, statsDoughnut = null;
+  let compareChart = null, compareBar = null, compareDoughnutA = null, compareDoughnutB = null;
+
+  // ---------------- date helpers ----------------
+  function toDateStr(d) { const tz = d.getTimezoneOffset(); const l = new Date(d.getTime() - tz*60000); return l.toISOString().slice(0,10); }
+  function todayStr() { return toDateStr(new Date()); }
+  function formatDate(dateStr) { const [y,m,d]=dateStr.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}); }
+  function formatDateShort(dateStr) { const [y,m,d]=dateStr.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
+  function escapeHtml(s) { const div = document.createElement('div'); div.textContent = s; return div.innerHTML; }
+
+  // ---------------- sound (Web Audio, fully generated — no files) ----------------
+  let audioCtx = null;
+  function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+  function playTone(freq, start, dur, type, gainVal) {
+    const ctx = getCtx();
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = type; osc.frequency.value = freq; gain.gain.value = gainVal;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(start); osc.stop(start + dur);
+  }
+  function playSuccessSound() {
+    if (!soundEnabled) return;
+    const ctx = getCtx(); const now = ctx.currentTime;
+    [523.25, 659.25, 783.99, 1046.5].forEach((f,i) => playTone(f, now + i*0.09, 0.16, 'triangle', 0.12));
+  }
+  function playSadSound() {
+    if (!soundEnabled) return;
+    const ctx = getCtx(); const now = ctx.currentTime;
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = 'sawtooth'; gain.gain.value = 0.1;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(300, now);
+    osc.frequency.exponentialRampToValueAtTime(90, now + 0.55);
+    osc.start(now); osc.stop(now + 0.55);
+  }
+  function playNeutralSound() { if (!soundEnabled) return; const ctx = getCtx(); playTone(440, ctx.currentTime, 0.14, 'sine', 0.1); }
+
+  // ---------------- confetti (hand-rolled, no external lib) ----------------
+  function launchConfetti(count) {
+    if (reduceMotion) return;
+    const colors = ['#FF6B5E','#FFD23F','#4ADE9E','#4D96FF','#FF5D8F','#FFB627'];
+    for (let i=0;i<count;i++){
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = (Math.random()*100) + 'vw';
+      piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+      piece.style.animationDuration = (2.4 + Math.random()*1.4) + 's';
+      piece.style.animationDelay = (Math.random()*0.25) + 's';
+      piece.style.transform = 'rotate(' + Math.floor(Math.random()*360) + 'deg)';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 4200);
+    }
+  }
+  function triggerShake(el) {
+    if (reduceMotion) { el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'), 600); return; }
+    el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+  }
+
+  // ---------------- auth error messages ----------------
+  function friendlyAuthError(err) {
+    const code = err && err.code;
+    if (code === 'auth/email-already-in-use') return 'That username is taken.';
+    if (code === 'auth/weak-password') return 'Password needs at least 6 characters.';
+    if (code === 'auth/invalid-email') return "That username has characters that aren't allowed.";
+    if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'Incorrect username or password.';
+    if (code === 'auth/network-request-failed') return 'Network error — check your connection.';
+    if (code === 'auth/too-many-requests') return 'Too many tries — wait a bit and try again.';
+    return 'Something went wrong. Try again.';
+  }
+  function usernameToEmail(username) { return username.trim().toLowerCase().replace(/[^a-z0-9_]/g,'') + '@dayvibe.local'; }
+  function showAuthError(msg) { authError.textContent = msg; authError.hidden = false; }
+  function clearAuthError() { authError.hidden = true; authError.textContent = ''; }
+  function setAuthLoading(loading) { document.querySelectorAll('.auth-submit').forEach(b => b.disabled = loading); authLoadingText.hidden = !loading; }
+
+  // ---------------- screen switching ----------------
+  function showAuthScreen() { setupNeeded.hidden = true; appScreen.hidden = true; authScreen.hidden = false; }
+  function showAppScreen() { setupNeeded.hidden = true; authScreen.hidden = true; appScreen.hidden = false; }
+
+  loginTabBtn.addEventListener('click', () => {
+    loginTabBtn.classList.add('active'); signupTabBtn.classList.remove('active');
+    loginForm.hidden = false; signupForm.hidden = true; clearAuthError();
+  });
+  signupTabBtn.addEventListener('click', () => {
+    signupTabBtn.classList.add('active'); loginTabBtn.classList.remove('active');
+    signupForm.hidden = false; loginForm.hidden = true; clearAuthError();
+  });
+
+  // ---------------- signup / login / logout ----------------
+  signupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearAuthError();
+    const username = signupUsername.value.trim();
+    const password = signupPassword.value;
+    if (!/^[a-zA-Z0-9_]{3,15}$/.test(username)) return showAuthError('Username: 3–15 letters, numbers, or underscores.');
+    if (password.length < 6) return showAuthError('Password needs at least 6 characters.');
+
+    setAuthLoading(true);
+    isSigningUp = true;
+    const email = usernameToEmail(username);
+    let cred;
+    try {
+      cred = await auth.createUserWithEmailAndPassword(email, password);
+    } catch (err) {
+      isSigningUp = false; setAuthLoading(false);
+      return showAuthError(friendlyAuthError(err));
+    }
+
+    const uid = cred.user.uid;
+    const metaRef = db.collection('meta').doc('config');
+    const userRef = db.collection('users').doc(uid);
+    try {
+      await db.runTransaction(async (tx) => {
+        const snap = await tx.get(metaRef);
+        const count = snap.exists ? (snap.data().userCount || 0) : 0;
+        if (count >= MAX_USERS) throw new Error('APP_FULL');
+        tx.set(metaRef, { userCount: count + 1 }, { merge: true });
+        tx.set(userRef, { username: username, colorOrder: count, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      });
+    } catch (txErr) {
+      await cred.user.delete().catch(() => {});
+      isSigningUp = false; setAuthLoading(false);
+      return showAuthError(txErr.message === 'APP_FULL' ? 'This tracker already has its 2 people 🙌' : 'Something went wrong. Try again.');
+    }
+
+    isSigningUp = false; setAuthLoading(false);
+    await loadProfileAndShowApp(cred.user);
+  });
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearAuthError();
+    const username = loginUsername.value.trim();
+    const password = loginPassword.value;
+    if (!username || !password) return showAuthError('Enter your username and password.');
+    setAuthLoading(true);
+    try {
+      await auth.signInWithEmailAndPassword(usernameToEmail(username), password);
+    } catch (err) {
+      showAuthError(friendlyAuthError(err));
+    }
+    setAuthLoading(false);
+  });
+
+  logoutBtn.addEventListener('click', () => auth.signOut());
+
+  async function loadProfileAndShowApp(user) {
+    currentUser = user;
+    const snap = await db.collection('users').doc(user.uid).get();
+    if (!snap.exists) {
+      await auth.signOut();
+      showAuthScreen();
+      showAuthError('Something went wrong with your account — please sign up again.');
+      return;
+    }
+    currentProfile = snap.data();
+    appUsername.textContent = currentProfile.username;
+    showAppScreen();
+    switchTab('rate');
+  }
+
+  // ---------------- tabs ----------------
+  function switchTab(name) {
+    const map = { rate: [ratePanel, rateTabBtn], stats: [statsPanel, statsTabBtn], compare: [comparePanel, compareTabBtn] };
+    Object.keys(map).forEach(k => {
+      map[k][0].hidden = (k !== name);
+      map[k][1].classList.toggle('active', k === name);
+    });
+    if (name === 'rate') loadRateTab();
+    if (name === 'stats') loadStatsTab();
+    if (name === 'compare') loadCompareTab();
+  }
+  rateTabBtn.addEventListener('click', () => switchTab('rate'));
+  statsTabBtn.addEventListener('click', () => switchTab('stats'));
+  compareTabBtn.addEventListener('click', () => switchTab('compare'));
+
+  muteBtn.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    muteBtn.textContent = soundEnabled ? '🔊' : '🔇';
+    muteBtn.setAttribute('aria-label', soundEnabled ? 'Mute sounds' : 'Unmute sounds');
+  });
+
+  // ---------------- rate today ----------------
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'rating-btn'; btn.dataset.value = String(i); btn.textContent = String(i);
+    btn.addEventListener('click', () => selectRating(i));
+    ratingRow.appendChild(btn);
+  }
+  const ratingButtons = Array.from(document.querySelectorAll('.rating-btn'));
+
+  function selectRating(n) {
+    selectedRating = n;
+    ratingButtons.forEach(b => b.classList.toggle('selected', Number(b.dataset.value) === n));
+    if (n) { bigEmoji.textContent = EMOJI_BY_RATING[n]; bigEmojiLabel.textContent = n + ' — ' + LABEL_BY_RATING[n]; }
+    else { bigEmoji.textContent = '❓'; bigEmojiLabel.textContent = 'Pick a number below'; }
+    submitBtn.disabled = !n;
+  }
+
+  async function loadRateTab() {
+    rateDateLabel.textContent = new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
+    const docId = currentUser.uid + '_' + todayStr();
+    const snap = await db.collection('ratings').doc(docId).get();
+    if (snap.exists) {
+      const data = snap.data();
+      selectRating(data.rating);
+      noteInput.value = data.note || '';
+      submitBtn.textContent = "Update today's shittiness";
+      alreadyRatedNote.hidden = false;
+    } else {
+      selectRating(null);
+      noteInput.value = '';
+      submitBtn.textContent = "Log today's shittiness";
+      alreadyRatedNote.hidden = true;
+    }
+    reactionCard.classList.remove('show');
+  }
+
+  submitBtn.addEventListener('click', async () => {
+    if (!selectedRating) return;
+    submitBtn.disabled = true;
+    const today = todayStr();
+    const docId = currentUser.uid + '_' + today;
+    try {
+      await db.collection('ratings').doc(docId).set({
+        uid: currentUser.uid,
+        username: currentProfile.username,
+        date: today,
+        rating: selectedRating,
+        note: noteInput.value.trim().slice(0,280),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      celebrateRating(selectedRating);
+      submitBtn.textContent = "Update today's shittiness";
+      alreadyRatedNote.hidden = false;
+    } catch (err) {
+      alert('Could not save your rating — check your connection and try again.');
+    }
+    submitBtn.disabled = false;
+  });
+
+  function celebrateRating(n) {
+    const bucket = bucketFor(n);
+    const captions = REACTION_CAPTIONS[bucket];
+    reactionCard.textContent = captions[Math.floor(Math.random()*captions.length)];
+    reactionCard.className = 'reaction-card show ' + bucket;
+    clearTimeout(reactionTimeout);
+    reactionTimeout = setTimeout(() => reactionCard.classList.remove('show'), 3400);
+
+    if (bucket === 'rough') { playSadSound(); triggerShake(reactionCard); }
+    else if (bucket === 'meh') { playNeutralSound(); }
+    else if (bucket === 'good') { playSuccessSound(); launchConfetti(28); }
+    else { playSuccessSound(); launchConfetti(70); }
+  }
+
+  // ---------------- shared chart builders ----------------
+  function drawLineChart(canvas, series, existing, setter) {
+    if (existing) existing.destroy();
+    const allDates = Array.from(new Set(series.flatMap(s => s.data.map(e => e.date)))).sort();
+    const datasets = series.map(s => {
+      const byDate = {}; s.data.forEach(e => byDate[e.date] = e.rating);
+      return {
+        label: s.label,
+        data: allDates.map(d => (d in byDate ? byDate[d] : null)),
+        spanGaps: true, borderColor: s.color, backgroundColor: s.color + '33',
+        pointBackgroundColor: s.color, pointRadius: 3, tension: 0.35, fill: true
+      };
+    });
+    const chart = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: { labels: allDates.map(formatDateShort), datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          y: { min: 1, max: 10, ticks: { stepSize: 1, color: '#C9C2D9' }, grid: { color: 'rgba(255,255,255,0.06)' } },
+          x: { ticks: { color: '#C9C2D9', maxRotation: 0, autoSkip: true }, grid: { display: false } }
+        },
+        plugins: {
+          legend: { display: series.length > 1, labels: { color: '#F7F3ED', font: { family: 'Nunito Sans' } } },
+          tooltip: { mode: 'index', intersect: false }
+        },
+        interaction: { mode: 'index', intersect: false }
+      }
+    });
+    setter(chart);
+  }
+
+  function bucketCounts(entries) {
+    const c = { rough:0, meh:0, good:0, amazing:0 };
+    entries.forEach(e => c[bucketFor(e.rating)]++);
+    return c;
+  }
+  function drawDoughnut(canvas, entries, existing, setter) {
+    if (existing) existing.destroy();
+    const counts = bucketCounts(entries);
+    const keys = Object.keys(BUCKET_META);
+    const chart = new Chart(canvas.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: keys.map(k => BUCKET_META[k].label), datasets: [{ data: keys.map(k => counts[k]), backgroundColor: keys.map(k => BUCKET_META[k].color), borderColor: '#2B2150', borderWidth: 2 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#F7F3ED', padding: 10, font: { size: 11, family: 'Nunito Sans' } } } } }
+    });
+    setter(chart);
+  }
+
+  function avgOf(entries) { return entries.length ? entries.reduce((s,e)=>s+e.rating,0)/entries.length : 0; }
+  function avgLastNDays(entries, n) { const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-n); const cutoffStr = toDateStr(cutoff); return avgOf(entries.filter(e => e.date >= cutoffStr)); }
+
+  function computeStreak(entries) {
+    const dateSet = new Set(entries.map(e => e.date));
+    const cursor = new Date();
+    if (!dateSet.has(toDateStr(cursor))) cursor.setDate(cursor.getDate()-1);
+    let streak = 0;
+    while (dateSet.has(toDateStr(cursor))) { streak++; cursor.setDate(cursor.getDate()-1); }
+    return streak;
+  }
+
+  // ---------------- stats tab ----------------
+  async function loadStatsTab() {
+    statsLoading.hidden = false; statsContent.hidden = true; statsEmpty.hidden = true;
+    const snap = await db.collection('ratings').where('uid','==',currentUser.uid).get();
+    const entries = snap.docs.map(d => d.data()).sort((a,b) => a.date.localeCompare(b.date));
+    statsLoading.hidden = true;
+    if (entries.length === 0) { statsEmpty.hidden = false; return; }
+    statsContent.hidden = false;
+
+    const avg = avgOf(entries);
+    const best = entries.reduce((a,b) => b.rating > a.rating ? b : a);
+    const worst = entries.reduce((a,b) => b.rating < a.rating ? b : a);
+
+    statAvg.textContent = avg.toFixed(1);
+    statStreak.textContent = computeStreak(entries) + '🔥';
+    statCount.textContent = entries.length;
+    statBest.textContent = EMOJI_BY_RATING[best.rating] + ' ' + best.rating + ' · ' + formatDate(best.date);
+    statWorst.textContent = EMOJI_BY_RATING[worst.rating] + ' ' + worst.rating + ' · ' + formatDate(worst.date);
+
+    drawLineChart(statsLineCanvas, [{ label: currentProfile.username, color: playerColor(currentProfile.colorOrder||0), data: entries }], statsChart, c => statsChart = c);
+    drawDoughnut(statsDoughnutCanvas, entries, statsDoughnut, c => statsDoughnut = c);
+
+    historyList.innerHTML = '';
+    entries.slice().reverse().forEach(e => {
+      const li = document.createElement('li');
+      li.className = 'history-item';
+      li.innerHTML = '<span class="history-emoji">' + EMOJI_BY_RATING[e.rating] + '</span>' +
+        '<span class="history-main"><span class="history-date">' + formatDate(e.date) + '</span>' +
+        (e.note ? '<span class="history-note">' + escapeHtml(e.note) + '</span>' : '') + '</span>' +
+        '<span class="history-rating">' + e.rating + '</span>';
+      historyList.appendChild(li);
+    });
+  }
+
+  // ---------------- compare tab ----------------
+  async function loadCompareTab() {
+    compareLoading.hidden = false; compareContent.hidden = true; compareWaiting.hidden = true;
+    const usersSnap = await db.collection('users').get();
+    const users = usersSnap.docs.map(d => Object.assign({ uid: d.id }, d.data()));
+    compareLoading.hidden = true;
+
+    if (users.length < 2) { compareWaiting.hidden = false; return; }
+    users.sort((a,b) => (a.colorOrder||0) - (b.colorOrder||0));
+    const [userA, userB] = users;
+
+    const ratingsSnap = await db.collection('ratings').get();
+    const all = ratingsSnap.docs.map(d => d.data());
+    const entriesA = all.filter(e => e.uid === userA.uid).sort((a,b) => a.date.localeCompare(b.date));
+    const entriesB = all.filter(e => e.uid === userB.uid).sort((a,b) => a.date.localeCompare(b.date));
+
+    compareContent.hidden = false;
+
+    badgeAInitial.textContent = (userA.username[0]||'?').toUpperCase();
+    badgeBInitial.textContent = (userB.username[0]||'?').toUpperCase();
+    badgeAName.textContent = userA.username;
+    badgeBName.textContent = userB.username;
+    badgeAStat.textContent = avgOf(entriesA).toFixed(1) + ' avg · ' + computeStreak(entriesA) + '🔥';
+    badgeBStat.textContent = avgOf(entriesB).toFixed(1) + ' avg · ' + computeStreak(entriesB) + '🔥';
+
+    const a7 = avgLastNDays(entriesA,7), b7 = avgLastNDays(entriesB,7);
+    if (entriesA.length === 0 || entriesB.length === 0) {
+      compareVerdict.textContent = "Not enough data yet this week — log a few days to see who's ahead!";
+    } else if (Math.abs(a7-b7) < 0.15) {
+      compareVerdict.textContent = '🤝 Dead even this week — both averaging around ' + a7.toFixed(1) + '.';
+    } else if (a7 > b7) {
+      compareVerdict.textContent = '🔥 ' + userA.username + ' is ahead this week, ' + a7.toFixed(1) + ' vs ' + b7.toFixed(1) + '.';
+    } else {
+      compareVerdict.textContent = '🔥 ' + userB.username + ' is ahead this week, ' + b7.toFixed(1) + ' vs ' + a7.toFixed(1) + '.';
+    }
+
+    drawLineChart(compareLineCanvas, [
+      { label: userA.username, color: playerColor(0), data: entriesA },
+      { label: userB.username, color: playerColor(1), data: entriesB }
+    ], compareChart, c => compareChart = c);
+
+    if (compareBar) compareBar.destroy();
+    const bestA = entriesA.length ? Math.max.apply(null, entriesA.map(e=>e.rating)) : 0;
+    const bestB = entriesB.length ? Math.max.apply(null, entriesB.map(e=>e.rating)) : 0;
+    compareBar = new Chart(compareBarCanvas.getContext('2d'), {
+      type: 'bar',
+      data: { labels: ['Average','Best day'], datasets: [
+        { label: userA.username, data: [avgOf(entriesA), bestA], backgroundColor: '#FFB627', borderRadius: 6 },
+        { label: userB.username, data: [avgOf(entriesB), bestB], backgroundColor: '#FF6B5E', borderRadius: 6 }
+      ]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { min:0, max:10, ticks:{ color:'#C9C2D9' }, grid:{ color:'rgba(255,255,255,0.06)' } }, x: { ticks:{ color:'#C9C2D9' }, grid:{ display:false } } },
+        plugins: { legend: { position:'bottom', labels:{ color:'#F7F3ED', font:{family:'Nunito Sans'} } } }
+      }
+    });
+
+    drawDoughnut(compareDoughnutACanvas, entriesA, compareDoughnutA, c => compareDoughnutA = c);
+    drawDoughnut(compareDoughnutBCanvas, entriesB, compareDoughnutB, c => compareDoughnutB = c);
+  }
+
+  // ---------------- boot ----------------
+  function boot() {
+    if (firebaseConfig.apiKey.indexOf('PASTE_') === 0) {
+      setupNeeded.hidden = false;
+      return;
+    }
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+
+    auth.onAuthStateChanged(async (user) => {
+      if (isSigningUp) return;
+      if (user) await loadProfileAndShowApp(user);
+      else showAuthScreen();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+</body>
+</html>
