@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Shitty Human — redesigned with friends, real‑time chat, day sharing, and privacy controls.
+  Shitty Human — redesigned with friends, real‑time chat, day sharing, privacy controls, and profile pictures.
 -->
 <html lang="en">
 <head>
@@ -107,16 +107,85 @@
     @keyframes rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     [hidden] { display: none !important; }
 
-    /* ── avatar badge ── */
-    .avatar-badge { border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #2a3322; border: 1px solid #3a4a30; flex-shrink: 0; }
+    /* ── avatar badge (now supports images) ── */
+    .avatar-badge {
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #2a3322;
+      border: 1px solid #3a4a30;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .avatar-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     .avatar-badge.xs { width: 24px; height: 24px; font-size: 12px; }
     .avatar-badge.sm { width: 32px; height: 32px; font-size: 16px; }
     .avatar-badge.md { width: 44px; height: 44px; font-size: 22px; }
     .avatar-badge.lg { width: 68px; height: 68px; font-size: 30px; border-width: 2px; border-color: #dbb74e; box-shadow: 0 0 0 3px rgba(219,183,78,0.15); }
-    .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 6px 0; }
-    .avatar-choice { aspect-ratio: 1; border-radius: 12px; border: 1px solid #3a4a30; background: #2a3322; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
-    .avatar-choice:hover { border-color: #b7af9c; transform: scale(1.05); }
-    .avatar-choice.selected { border-color: #dbb74e; background: rgba(219,183,78,0.15); box-shadow: 0 0 0 2px #dbb74e; }
+
+    /* ── profile picture picker ── */
+    .profile-pic-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 8px 0;
+      max-width: 300px;
+    }
+    .profile-pic-option {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      border: 2px solid #3a4a30;
+      background: #2a3322;
+      overflow: hidden;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .profile-pic-option img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-pic-option:hover {
+      border-color: #b7af9c;
+      transform: scale(1.04);
+    }
+    .profile-pic-option.selected {
+      border-color: #dbb74e;
+      box-shadow: 0 0 0 3px rgba(219,183,78,0.3);
+    }
+    .profile-pic-option .emoji-fallback {
+      font-size: 2rem;
+    }
+
+    .profile-avatar-big {
+      font-size: 3rem;
+      background: transparent;
+      border: 2px solid #3a4a30;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+      overflow: hidden;
+    }
+    .profile-avatar-big img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-avatar-big:hover { border-color: #dbb74e; }
+    .profile-avatar-hint { font-size: 0.65rem; color: #7a6f5a; margin-top: -4px; }
 
     /* ── rating buttons ── */
     .rating-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 0.8rem; }
@@ -208,9 +277,9 @@
 
     /* ── profile ── */
     .profile-topbar { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem; }
-    .profile-avatar-big { font-size: 3rem; background: transparent; border: 2px solid #3a4a30; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-    .profile-avatar-big:hover { border-color: #dbb74e; }
-    .profile-avatar-hint { font-size: 0.65rem; color: #7a6f5a; margin-top: -4px; }
+    .profile-pic-grid-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
+    .profile-pic-grid-container .profile-pic-grid { max-width: 300px; width: 100%; }
+
     .profile-field { margin-bottom: 0.8rem; }
     .profile-field label { font-size: 0.7rem; font-weight: 600; color: #b7af9c; display: block; margin-bottom: 3px; }
     .profile-name-row { display: flex; gap: 6px; align-items: center; }
@@ -439,7 +508,9 @@
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
           <button class="profile-avatar-big" id="profileAvatarBig">💩</button>
           <div class="profile-avatar-hint">Tap to change</div>
-          <div class="avatar-grid" id="profileEmojiGrid" hidden></div>
+          <div class="profile-pic-grid-container">
+            <div class="profile-pic-grid" id="profilePicGrid"></div>
+          </div>
         </div>
         <div class="profile-field">
           <label>Display name</label>
@@ -488,7 +559,7 @@
 (function() {
   "use strict";
 
-  // ── FIREBASE CONFIG ── (paste your own here)
+  // ── FIREBASE CONFIG ──
   const firebaseConfig = {
     apiKey: "AIzaSyC2bwQtju5A9wNNLaz3DSF8nrpLPaPiRZg",
     authDomain: "shitty-human.firebaseapp.com",
@@ -518,6 +589,16 @@
   const WEEKDAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const QUICK_REACTIONS = ['❤️','😂','😮','😢','👍','🔥'];
   const MOOD_ACCENTS = { stormy: '#b85a44', calm: '#8f7f55', thriving: '#dbb74e' };
+
+  // ── PROFILE PICTURE URLS ──
+  const PROFILE_PICS = [
+    { name: 'Albert Camus', url: 'https://raw.githubusercontent.com/Jishnuec/shitty-human/master/Profile/Albert%20camus.jpg' },
+    { name: 'Emil Michel Cioran', url: 'https://raw.githubusercontent.com/Jishnuec/shitty-human/master/Profile/Emil%20michel%20cioran.jpg' },
+    { name: 'Friedrich Nietzsche', url: 'https://raw.githubusercontent.com/Jishnuec/shitty-human/master/Profile/Friedrich%20Nietzsche.jpg' },
+    { name: 'Fyodor Dostoevsky', url: 'https://raw.githubusercontent.com/Jishnuec/shitty-human/master/Profile/Fyodor%20Dostoevsky.jpg' },
+    { name: 'Jean-Paul Sartre', url: 'https://raw.githubusercontent.com/Jishnuec/shitty-human/master/Profile/Jean-Paul%20Sartre.jpg' },
+    { name: 'Søren Kierkegaard', url: 'https://raw.githubusercontent.com/Jishnuec/shitty-human/master/Profile/S%C3%B8ren%20Kierkegaard.jpg' }
+  ];
 
   function bucketFor(n) { if (n<=3) return 'rough'; if (n<=6) return 'meh'; if (n<=8) return 'good'; return 'amazing'; }
   function seriesColor(idx) { return idx === 0 ? '#dbb74e' : '#5c8c6e'; }
@@ -556,7 +637,7 @@
   const streakBanner = $('streakBanner'), compareVerdict = $('compareVerdict');
   const compareLineCanvas = $('compareLineCanvas'), compareBarCanvas = $('compareBarCanvas');
   const compareDoughnutACanvas = $('compareDoughnutACanvas'), compareDoughnutBCanvas = $('compareDoughnutBCanvas');
-  const profileBackBtn = $('profileBackBtn'), profileAvatarBig = $('profileAvatarBig'), profileEmojiGrid = $('profileEmojiGrid');
+  const profileBackBtn = $('profileBackBtn'), profileAvatarBig = $('profileAvatarBig'), profilePicGrid = $('profilePicGrid');
   const profileDisplayNameInput = $('profileDisplayNameInput'), profileDisplayNameSaveBtn = $('profileDisplayNameSaveBtn');
   const profileUsernameStatic = $('profileUsernameStatic'), profileMsg = $('profileMsg');
   const shareRatingsToggle = $('shareRatingsToggle'), shareNotesToggle = $('shareNotesToggle');
@@ -579,7 +660,7 @@
   let myFriendships = [], friendsList = [], incomingRequests = [], outgoingRequests = [];
   let friendshipsUnsub = null;
   let activeChatFriendUid = null, activeChatPairId = null, chatMessagesUnsub = null, chatMessageLimit = 40, chatMessagesCache = [];
-  let profileEmojiGridBuilt = false, profileMsgTimeout = null;
+  let profilePicGridBuilt = false, profileMsgTimeout = null;
 
   // ── HELPERS ──
   function toDateStr(d) { const tz = d.getTimezoneOffset(); const l = new Date(d.getTime() - tz*60000); return l.toISOString().slice(0,10); }
@@ -649,8 +730,7 @@
     const snap=await db.collection('users').doc(user.uid).get();
     if(!snap.exists){await auth.signOut();showAuthScreen();showAuthError('Account error.');return;}
     currentProfile=snap.data();
-    appAvatarBadge.textContent=currentProfile.emoji||'💩';
-    appUsernameText.textContent=currentProfile.displayName||currentProfile.username;
+    updateHeaderChip();
     showAppScreen();
     await runOneTimeMigration().catch(()=>{});
     attachFriendshipsListener();
@@ -658,6 +738,16 @@
     refreshMoodFromEntries(myEntries);
     if(!currentProfile.emoji) openAvatarPickerOverlay();
     switchTab('rate');
+  }
+
+  function updateHeaderChip() {
+    const avatarEl = appAvatarBadge;
+    if (currentProfile.pic) {
+      avatarEl.innerHTML = '<img src="'+escapeHtml(currentProfile.pic)+'" alt="avatar" />';
+    } else {
+      avatarEl.textContent = currentProfile.emoji || '💩';
+    }
+    appUsernameText.textContent = currentProfile.displayName || currentProfile.username;
   }
 
   async function runOneTimeMigration(){
@@ -676,7 +766,33 @@
     }catch(e){}
   }
 
-  function openAvatarPickerOverlay(){buildAvatarGrid(document.getElementById('avatarPickerGrid')||avatarPickerGrid,async(emoji,btn,container)=>{markAvatarSelected(container,emoji);try{await db.collection('users').doc(currentUser.uid).update({emoji});currentProfile.emoji=emoji;appAvatarBadge.textContent=emoji;document.getElementById('avatarPickerOverlay').hidden=true;}catch(e){}});document.getElementById('avatarPickerOverlay').hidden=false;}
+  function openAvatarPickerOverlay(){buildAvatarGrid(document.getElementById('avatarPickerGrid')||avatarPickerGrid,async(emoji,btn,container)=>{markAvatarSelected(container,emoji);try{await db.collection('users').doc(currentUser.uid).update({emoji});currentProfile.emoji=emoji;updateHeaderChip();document.getElementById('avatarPickerOverlay').hidden=true;}catch(e){}});document.getElementById('avatarPickerOverlay').hidden=false;}
+
+  // ── PROFILE PIC GRID ──
+  function buildProfilePicGrid(container, selectedUrl, onPick) {
+    container.innerHTML = '';
+    PROFILE_PICS.forEach(pic => {
+      const div = document.createElement('div');
+      div.className = 'profile-pic-option' + (pic.url === selectedUrl ? ' selected' : '');
+      div.innerHTML = '<img src="'+escapeHtml(pic.url)+'" alt="'+escapeHtml(pic.name)+'" />';
+      div.title = pic.name;
+      div.addEventListener('click', () => onPick(pic.url, div, container));
+      container.appendChild(div);
+    });
+    // Add an emoji fallback option (deselects picture)
+    const emojiDiv = document.createElement('div');
+    emojiDiv.className = 'profile-pic-option' + (!selectedUrl ? ' selected' : '');
+    emojiDiv.innerHTML = '<span class="emoji-fallback">' + (currentProfile?.emoji || '💩') + '</span>';
+    emojiDiv.title = 'Use emoji instead';
+    emojiDiv.addEventListener('click', () => onPick(null, emojiDiv, container));
+    container.appendChild(emojiDiv);
+  }
+
+  function markPicSelected(container, url) {
+    Array.from(container.children).forEach(el => {
+      el.classList.toggle('selected', el.dataset?.url === url);
+    });
+  }
 
   // ── FRIENDS SYSTEM ──
   async function getProfile(uid){const snap=await db.collection('users').doc(uid).get();return snap.exists?Object.assign({uid},snap.data()):{uid,username:'unknown',displayName:'Unknown',emoji:'❔'};}
@@ -712,33 +828,74 @@
   function buildFriendSwitcher(container,activeUid,onSelect){
     if(friendsList.length<=1){container.hidden=true;container.innerHTML='';return;}
     container.hidden=false;container.innerHTML='';
-    friendsList.forEach(f=>{const pill=document.createElement('button');pill.type='button';pill.className='friend-pill'+(f.uid===activeUid?' active':'');pill.innerHTML='<span class="avatar-badge xs">'+escapeHtml(f.emoji||'💩')+'</span><span>'+escapeHtml(f.displayName||f.username)+'</span>';pill.addEventListener('click',()=>onSelect(f.uid));container.appendChild(pill);});
+    friendsList.forEach(f=>{const pill=document.createElement('button');pill.type='button';pill.className='friend-pill'+(f.uid===activeUid?' active':'');pill.innerHTML='<span class="avatar-badge xs">'+(f.pic?'<img src="'+escapeHtml(f.pic)+'" alt="" />':escapeHtml(f.emoji||'💩'))+'</span><span>'+escapeHtml(f.displayName||f.username)+'</span>';pill.addEventListener('click',()=>onSelect(f.uid));container.appendChild(pill);});
   }
 
   // ── PROFILE ──
   function showProfileMsg(text,isError,target){const el=target||profileMsg;el.textContent=text;el.className='profile-msg show'+(isError?' error':'');clearTimeout(profileMsgTimeout);profileMsgTimeout=setTimeout(()=>el.classList.remove('show'),2800);}
   function renderProfilePanel(){
-    profileAvatarBig.textContent=currentProfile.emoji||'💩';
-    profileEmojiGrid.hidden=true;
+    const avatarEl = profileAvatarBig;
+    if (currentProfile.pic) {
+      avatarEl.innerHTML = '<img src="'+escapeHtml(currentProfile.pic)+'" alt="profile" />';
+    } else {
+      avatarEl.textContent = currentProfile.emoji || '💩';
+    }
     profileDisplayNameInput.value=currentProfile.displayName||currentProfile.username;
     profileUsernameStatic.textContent='@'+currentProfile.username;
     shareRatingsToggle.checked=currentProfile.shareRatings!==false;
     shareNotesToggle.checked=currentProfile.shareNotes!==false;
     renderFriendsSection();
+    ensureProfilePicGrid();
   }
-  function ensureProfileEmojiGrid(){if(profileEmojiGridBuilt)return;buildAvatarGrid(profileEmojiGrid,async(emoji,btn,container)=>{markAvatarSelected(container,emoji);try{await db.collection('users').doc(currentUser.uid).update({emoji});currentProfile.emoji=emoji;appAvatarBadge.textContent=emoji;profileAvatarBig.textContent=emoji;showProfileMsg('Avatar updated!');}catch(e){showProfileMsg('Could not update.',true);}});profileEmojiGridBuilt=true;}
-  profileAvatarBig.addEventListener('click',()=>{ensureProfileEmojiGrid();profileEmojiGrid.hidden=!profileEmojiGrid.hidden;if(!profileEmojiGrid.hidden)markAvatarSelected(profileEmojiGrid,currentProfile.emoji);});
+
+  function ensureProfilePicGrid(){
+    if(profilePicGridBuilt) return;
+    buildProfilePicGrid(profilePicGrid, currentProfile.pic || null, async (url, el, container) => {
+      const wasPic = currentProfile.pic;
+      const newPic = url;
+      // Update UI immediately
+      Array.from(container.children).forEach(child => child.classList.remove('selected'));
+      el.classList.add('selected');
+      try {
+        await db.collection('users').doc(currentUser.uid).update({ pic: newPic });
+        currentProfile.pic = newPic;
+        updateHeaderChip();
+        // Update profile avatar display
+        const avatarEl = profileAvatarBig;
+        if (newPic) {
+          avatarEl.innerHTML = '<img src="'+escapeHtml(newPic)+'" alt="profile" />';
+        } else {
+          avatarEl.textContent = currentProfile.emoji || '💩';
+        }
+        showProfileMsg('Profile picture updated!');
+      } catch(e) {
+        // revert UI selection
+        Array.from(container.children).forEach(child => {
+          const isSelected = child.querySelector('img')?.src === wasPic;
+          child.classList.toggle('selected', isSelected);
+        });
+        showProfileMsg('Could not update picture.', true);
+      }
+    });
+    profilePicGridBuilt = true;
+  }
+
+  profileAvatarBig.addEventListener('click',()=>{
+    ensureProfilePicGrid();
+    profilePicGrid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
   profileDisplayNameSaveBtn.addEventListener('click',async()=>{const name=profileDisplayNameInput.value.trim();if(!name)return showProfileMsg("Name can't be empty.",true);if(name.length>24)return showProfileMsg('Too long.',true);try{await db.collection('users').doc(currentUser.uid).update({displayName:name});currentProfile.displayName=name;appUsernameText.textContent=name;showProfileMsg('Name updated!');}catch(e){showProfileMsg('Could not save.',true);}});
   shareRatingsToggle.addEventListener('change',async()=>{const val=shareRatingsToggle.checked;try{await db.collection('users').doc(currentUser.uid).update({shareRatings:val});currentProfile.shareRatings=val;showProfileMsg('Saved.');}catch(e){shareRatingsToggle.checked=!val;showProfileMsg('Could not save.',true);}});
   shareNotesToggle.addEventListener('change',async()=>{const val=shareNotesToggle.checked;try{await db.collection('users').doc(currentUser.uid).update({shareNotes:val});currentProfile.shareNotes=val;showProfileMsg('Saved.');}catch(e){shareNotesToggle.checked=!val;showProfileMsg('Could not save.',true);}});
   addFriendBtn.addEventListener('click',async()=>{addFriendBtn.disabled=true;const res=await sendFriendRequest(addFriendInput.value);showProfileMsg(res.msg,!res.ok,addFriendMsg);if(res.ok)addFriendInput.value='';addFriendBtn.disabled=false;});
   addFriendInput.addEventListener('keydown',(e)=>{if(e.key==='Enter')addFriendBtn.click();});
 
-  function friendRowEl(avatar,name,actionsBuilder){const row=document.createElement('div');row.className='friend-row';row.innerHTML='<span class="avatar-badge sm">'+escapeHtml(avatar||'💩')+'</span><span class="friend-row-name">'+escapeHtml(name)+'</span><span class="friend-row-actions"></span>';actionsBuilder(row.querySelector('.friend-row-actions'));return row;}
+  function friendRowEl(avatar, name, actionsBuilder){const row=document.createElement('div');row.className='friend-row';row.innerHTML='<span class="avatar-badge sm">'+(avatar?.startsWith('http')?'<img src="'+escapeHtml(avatar)+'" alt="" />':escapeHtml(avatar||'💩'))+'</span><span class="friend-row-name">'+escapeHtml(name)+'</span><span class="friend-row-actions"></span>';actionsBuilder(row.querySelector('.friend-row-actions'));return row;}
   function renderFriendsSection(){
-    incomingRequestsSection.hidden=incomingRequests.length===0;incomingRequestsList.innerHTML='';incomingRequests.forEach(r=>{incomingRequestsList.appendChild(friendRowEl(r.profile.emoji,r.profile.displayName||r.profile.username,(a)=>{const accept=document.createElement('button');accept.type='button';accept.className='btn-chip accept';accept.textContent='Accept';accept.addEventListener('click',()=>acceptFriendRequest(r.id));const decline=document.createElement('button');decline.type='button';decline.className='btn-chip decline';decline.textContent='Decline';decline.addEventListener('click',()=>endFriendship(r.id));a.appendChild(accept);a.appendChild(decline);}));});
-    outgoingRequestsSection.hidden=outgoingRequests.length===0;outgoingRequestsList.innerHTML='';outgoingRequests.forEach(r=>{outgoingRequestsList.appendChild(friendRowEl(r.profile.emoji,'Waiting for '+(r.profile.displayName||r.profile.username),(a)=>{const cancel=document.createElement('button');cancel.type='button';cancel.className='btn-chip decline';cancel.textContent='Cancel';cancel.addEventListener('click',()=>endFriendship(r.id));a.appendChild(cancel);}));});
-    friendsEmptyMsg.hidden=friendsList.length!==0;friendsListEl.innerHTML='';friendsList.forEach(f=>{friendsListEl.appendChild(friendRowEl(f.emoji,f.displayName||f.username,(a)=>{const remove=document.createElement('button');remove.type='button';remove.className='btn-chip decline';remove.textContent='Remove';remove.addEventListener('click',()=>{if(confirm('Remove '+(f.displayName||f.username)+'?'))endFriendship(f.pairId);});a.appendChild(remove);}));});
+    incomingRequestsSection.hidden=incomingRequests.length===0;incomingRequestsList.innerHTML='';incomingRequests.forEach(r=>{incomingRequestsList.appendChild(friendRowEl(r.profile.pic||r.profile.emoji,r.profile.displayName||r.profile.username,(a)=>{const accept=document.createElement('button');accept.type='button';accept.className='btn-chip accept';accept.textContent='Accept';accept.addEventListener('click',()=>acceptFriendRequest(r.id));const decline=document.createElement('button');decline.type='button';decline.className='btn-chip decline';decline.textContent='Decline';decline.addEventListener('click',()=>endFriendship(r.id));a.appendChild(accept);a.appendChild(decline);}));});
+    outgoingRequestsSection.hidden=outgoingRequests.length===0;outgoingRequestsList.innerHTML='';outgoingRequests.forEach(r=>{outgoingRequestsList.appendChild(friendRowEl(r.profile.pic||r.profile.emoji,'Waiting for '+(r.profile.displayName||r.profile.username),(a)=>{const cancel=document.createElement('button');cancel.type='button';cancel.className='btn-chip decline';cancel.textContent='Cancel';cancel.addEventListener('click',()=>endFriendship(r.id));a.appendChild(cancel);}));});
+    friendsEmptyMsg.hidden=friendsList.length!==0;friendsListEl.innerHTML='';friendsList.forEach(f=>{friendsListEl.appendChild(friendRowEl(f.pic||f.emoji,f.displayName||f.username,(a)=>{const remove=document.createElement('button');remove.type='button';remove.className='btn-chip decline';remove.textContent='Remove';remove.addEventListener('click',()=>{if(confirm('Remove '+(f.displayName||f.username)+'?'))endFriendship(f.pairId);});a.appendChild(remove);}));});
   }
 
   function openProfile(){profilePanel.hidden=false;[ratePanel,chatPanel,statsPanel,comparePanel].forEach(p=>p.hidden=true);[rateTabBtn,chatTabBtn,statsTabBtn,compareTabBtn].forEach(b=>b.classList.remove('active'));renderProfilePanel();}
@@ -816,7 +973,7 @@
   function celebrateBadge(def){playBadgeSound();launchConfetti(20);const toast=document.createElement('div');toast.className='badge-toast';toast.innerHTML='<span class="icon">'+def.emoji+'</span><span class="text"><strong>Badge unlocked!</strong>'+escapeHtml(def.name)+'</span>';badgeToastLayer.appendChild(toast);setTimeout(()=>toast.remove(),4000);}
 
   // ── STATS ──
-  function renderHeatmap(entries){const weeks=14;const map={};entries.forEach(e=>map[e.date]=e.rating);const today=new Date();today.setHours(0,0,0,0);const dow=today.getDay();const lastSunday=new Date(today);lastSunday.setDate(today.getDate()-dow);const firstSunday=new Date(lastSunday);firstSunday.setDate(lastSunday.getDate()-(weeks-1)*7);heatmapGrid.innerHTML='';for(let w=0;w<weeks;w++){for(let d=0;d<7;d++){const cellDate=new Date(firstSunday);cellDate.setDate(firstSunday.getDate()+w*7+d);const cell=document.createElement('div');cell.className='heatmap-cell';if(cellDate>today){cell.classList.add('future');heatmapGrid.appendChild(cell);continue;}const ds=toDateStr(cellDate);const rating=map[ds];if(typeof rating==='number'){cell.classList.add(bucketFor(rating));cell.title=formatDate(ds)+' — '+rating+'/10';}else{cell.title=formatDate(ds)+' — not rated';}heatmapGrid.appendChild(cell);}}}
+  function renderHeatmap(entries){const weeks=14;const map={};entries.forEach(e=>map[e.date]=e.rating);const today=new Date();today.setHours(0,0,0,0);const dow=today.getDay();const lastSunday=new Date(today);lastSunday.setDate(today.getDate()-dow);const firstSunday=new Date(lastSunday);firstSunday.setDate(lastSunday.getDate()-(weeks-1)*7);heatmapGrid.innerHTML='';for(let w=0;w<weeks;w++){for(let d=0;d<7;d++){const cellDate=new Date(firstSunday);cellDate.setDate(firstSunday.getDate()+w*7+d);const cell=document.createElement('div');cell.className='heatmap-cell';if(cellDate>today){cell.classList.add('future');heatmapGrid.appendChild(cell);continue;}const ds=toDateStr(cellDate);const rating=map[ds];if(typeof rating==='number'){cell.classList.add(bucketFor(rating));cell.title=formatDate(ds)+' — '+rating+' /10';}else{cell.title=formatDate(ds)+' — not rated';}heatmapGrid.appendChild(cell);}}}
   async function loadStatsTab(){statsLoading.hidden=false;statsContent.hidden=true;statsEmpty.hidden=true;await fetchMyEntries(true);statsLoading.hidden=true;if(myEntries.length===0){statsEmpty.hidden=false;return;}statsContent.hidden=false;const e=myEntries;const avg=avgOf(e);const best=e.reduce((a,b)=>b.rating>a.rating?b:a);const worst=e.reduce((a,b)=>b.rating<a.rating?b:a);statAvg.textContent=avg.toFixed(1);statStreak.textContent=computeStreak(e)+'🔥';statLongestStreak.textContent=longestStreak(e)+'🏅';statCount.textContent=e.length;statBest.textContent=EMOJI_BY_RATING[best.rating]+' '+best.rating+' · '+formatDate(best.date);statWorst.textContent=EMOJI_BY_RATING[worst.rating]+' '+worst.rating+' · '+formatDate(worst.date);const trend=computeTrend(e);if(trend){if(trend.delta>0.05)trendValue.innerHTML='Up <b>+'+trend.delta.toFixed(1)+'</b> — '+trend.thisWeek.toFixed(1)+' vs '+trend.lastWeek.toFixed(1);else if(trend.delta<-0.05)trendValue.innerHTML='Down <b>'+trend.delta.toFixed(1)+'</b> — '+trend.thisWeek.toFixed(1)+' vs '+trend.lastWeek.toFixed(1);else trendValue.innerHTML='Steady around <b>'+trend.thisWeek.toFixed(1)+'</b>';}else trendValue.textContent='Log a full week to see your trend.';const wd=computeWeekdayStats(e);if(wd&&wd.enoughVariety){bestWeekdayValue.innerHTML="Happiest on <b>"+wd.best.day+'s</b> ('+wd.best.avg.toFixed(1)+')';worstWeekdayValue.innerHTML='<b>'+wd.worst.day+'s</b> are rough ('+wd.worst.avg.toFixed(1)+')';}else{bestWeekdayValue.textContent='Rate more days to see patterns.';worstWeekdayValue.textContent='Rate more days to see patterns.';}renderHeatmap(e);await refreshBadges(e);drawLineChart(statsLineCanvas,[{label:currentProfile.displayName||currentProfile.username,color:seriesColor(0),data:e}],statsChart,c=>statsChart=c);drawDoughnut(statsDoughnutCanvas,e,statsDoughnut,c=>statsDoughnut=c);historyList.innerHTML='';e.slice().reverse().forEach(r=>{const li=document.createElement('li');li.className='history-item';li.innerHTML='<span class="history-emoji">'+EMOJI_BY_RATING[r.rating]+'</span><span class="history-main"><span class="history-date">'+formatDate(r.date)+(r.private?' 🔒':'')+'</span>'+(r.note?'<span class="history-note">'+escapeHtml(r.note)+'</span>':'')+'</span><span class="history-rating">'+r.rating+'</span>';historyList.appendChild(li);});refreshMoodFromEntries(e);}
   function computeTrend(e){const now=new Date();const thisStart=new Date(now);thisStart.setDate(now.getDate()-6);const lastEnd=new Date(thisStart);lastEnd.setDate(thisStart.getDate()-1);const lastStart=new Date(lastEnd);lastStart.setDate(lastEnd.getDate()-6);const inRange=(d,a,b)=>d>=toDateStr(a)&&d<=toDateStr(b);const tw=e.filter(x=>inRange(x.date,thisStart,now));const lw=e.filter(x=>inRange(x.date,lastStart,lastEnd));if(tw.length===0||lw.length===0)return null;return{thisWeek:avgOf(tw),lastWeek:avgOf(lw),delta:avgOf(tw)-avgOf(lw)};}
   function computeWeekdayStats(e){const by={};e.forEach(r=>{const w=dayOfWeekName(r.date);(by[w]=by[w]||[]).push(r.rating);});const avgs=Object.keys(by).map(w=>({day:w,avg:by[w].reduce((a,b)=>a+b,0)/by[w].length}));if(!avgs.length)return null;avgs.sort((a,b)=>b.avg-a.avg);return{best:avgs[0],worst:avgs[avgs.length-1],enoughVariety:avgs.length>=2};}
@@ -831,7 +988,9 @@
     await fetchMyEntries(true);const friendEntries=await fetchFriendVisibleEntries(friend.uid);
     compareLoading.hidden=true;compareContent.hidden=false;
     const myE=myEntries,frE=friendEntries;const myName=currentProfile.displayName||currentProfile.username;const frName=friend.displayName||friend.username;
-    badgeAAvatar.textContent=currentProfile.emoji||'💩';badgeBAvatar.textContent=friend.emoji||'💩';badgeAName.textContent=myName;badgeBName.textContent=frName;
+    badgeAAvatar.innerHTML = currentProfile.pic ? '<img src="'+escapeHtml(currentProfile.pic)+'" alt="" />' : (currentProfile.emoji||'💩');
+    badgeBAvatar.innerHTML = friend.pic ? '<img src="'+escapeHtml(friend.pic)+'" alt="" />' : (friend.emoji||'💩');
+    badgeAName.textContent=myName;badgeBName.textContent=frName;
     const [bA,bB]=await Promise.all([fetchBadgeCount(currentUser.uid),fetchBadgeCount(friend.uid)]);
     badgeAStat.textContent=avgOf(myE).toFixed(1)+' avg · '+computeStreak(myE)+'🔥 · 🎖'+bA;badgeBStat.textContent=avgOf(frE).toFixed(1)+' avg · '+computeStreak(frE)+'🔥 · 🎖'+bB;
     const streak=computeWinningStreak(myE,frE);
@@ -852,7 +1011,8 @@
     if(!activeChatFriendUid||!friendsList.some(f=>f.uid===activeChatFriendUid))activeChatFriendUid=friendsList[0].uid;
     buildFriendSwitcher(chatFriendSwitcher,activeChatFriendUid,(uid)=>{activeChatFriendUid=uid;loadChatTab();});
     const friend=friendsList.find(f=>f.uid===activeChatFriendUid);
-    chatHeaderAvatar.textContent=friend.emoji||'💩';chatHeaderName.textContent=friend.displayName||friend.username;chatHeaderSub.textContent='online';
+    chatHeaderAvatar.innerHTML = friend.pic ? '<img src="'+escapeHtml(friend.pic)+'" alt="" />' : (friend.emoji||'💩');
+    chatHeaderName.textContent=friend.displayName||friend.username;chatHeaderSub.textContent='online';
     chatLoading.hidden=true;chatContent.hidden=false;
     const pairId=makePairId(currentUser.uid,friend.uid);activeChatPairId=pairId;
     if(chatMessagesUnsub){chatMessagesUnsub();chatMessagesUnsub=null;}
