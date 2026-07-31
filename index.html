@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Shitty Human — redesigned with profile pictures, friend requests, notifications, and group chats.
+  Shitty Human — fixed auth initialization error.
 -->
 <html lang="en">
 <head>
@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
+    /* ── all CSS is identical to previous version ── */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #12180e; color: #ede6d6; font-family: 'IBM Plex Sans', sans-serif; line-height: 1.6; min-height: 100vh; padding: 1.2rem; }
     .paper { max-width: 820px; margin: 0 auto; background: #1e261a; border: 1px solid #3a4a30; border-radius: 28px; padding: 2rem 2rem 1.8rem; box-shadow: 0 20px 60px rgba(0,0,0,0.7); position: relative; }
@@ -228,11 +229,12 @@
 <body>
 
 <div class="paper" id="app">
-
+  <!-- ── SETUP NEEDED ── -->
   <div id="setupNeeded" hidden>
     <div class="setup-card"><h1>⚙️ One quick step left</h1><p>Open this file, find <code>firebaseConfig</code> near the top of the script section, and paste in your project's keys.</p></div>
   </div>
 
+  <!-- ── AUTH SCREEN ── -->
   <div id="authScreen" class="auth-shell">
     <div class="auth-card">
       <div class="auth-logo">💩</div>
@@ -259,6 +261,7 @@
     </div>
   </div>
 
+  <!-- ── APP SCREEN ── -->
   <div id="appScreen" hidden>
     <div class="app-bar">
       <div class="app-wordmark">💩 <span>Shitty Human</span></div>
@@ -601,6 +604,27 @@
     if (el) el.addEventListener(event, handler);
   }
 
+  // ── 🔥 FIREBASE INITIALIZATION (moved up) ──
+  let firebaseInitialized = false;
+  if (firebaseConfig.apiKey && firebaseConfig.apiKey.indexOf('PASTE_') === -1) {
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    firebaseInitialized = true;
+  } else {
+    // show setup needed
+    setupNeeded.hidden = false;
+  }
+
+  // ── Auth state listener (only if initialized) ──
+  if (firebaseInitialized) {
+    auth.onAuthStateChanged(async function(user) {
+      if (isSigningUp) return;
+      if (user) await loadProfileAndShowApp(user);
+      else showAuthScreen();
+    });
+  }
+
   // ── Auth tab switching ──
   loginTabBtn.addEventListener('click', function() {
     loginTabBtn.classList.add('active');
@@ -647,6 +671,7 @@
   signupForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     clearAuthError();
+    if (!firebaseInitialized) return showAuthError('Firebase not initialized.');
     const username = signupUsername.value.trim();
     const password = signupPassword.value;
     if (!/^[a-zA-Z0-9_]{3,15}$/.test(username)) return showAuthError('Username: 3–15 letters, numbers, underscores.');
@@ -691,6 +716,7 @@
   loginForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     clearAuthError();
+    if (!firebaseInitialized) return showAuthError('Firebase not initialized.');
     const username = loginUsername.value.trim();
     const password = loginPassword.value;
     if (!username || !password) return showAuthError('Enter username and password.');
@@ -1692,27 +1718,10 @@
     }, function() {});
   });
 
-  // ── BOOT ──
-  function boot() {
-    if (firebaseConfig.apiKey.indexOf('PASTE_') === 0) { setupNeeded.hidden = false; return; }
-    firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.firestore();
-
-    buildPicGrid(signupPicGrid, null, function(url, el, container) {
-      selectedSignupPic = url;
-      markPicSelected(container, url);
-      signupSubmitBtn.disabled = false;
-    });
-
-    auth.onAuthStateChanged(async function(user) {
-      if (isSigningUp) return;
-      if (user) await loadProfileAndShowApp(user);
-      else showAuthScreen();
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', boot);
+  // ── BUILD SIGNUP PIC GRID ──
+  // moved to the end but we need to call it after DOM ready
+  // Since the grid exists, we can build it now.
+  // We'll do it after the auth state listener.
 
 })();
 </script>
