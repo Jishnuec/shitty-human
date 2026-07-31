@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Shitty Human — final version with friend management in header.
+  Shitty Human — complete working version with all features.
 -->
 <html lang="en">
 <head>
@@ -11,7 +11,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* ── all CSS exactly as previous, with tiny additions for friend input in header ── */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #12180e; color: #ede6d6; font-family: 'IBM Plex Sans', sans-serif; line-height: 1.6; min-height: 100vh; padding: 1.2rem; }
     .paper { max-width: 820px; margin: 0 auto; background: #1e261a; border: 1px solid #3a4a30; border-radius: 28px; padding: 2rem 2rem 1.8rem; box-shadow: 0 20px 60px rgba(0,0,0,0.7); position: relative; }
@@ -59,7 +58,6 @@
     .icon-btn { background: transparent; border: 1px solid #3a4a30; color: #ede6d6; width: 32px; height: 32px; border-radius: 50%; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
     .icon-btn:hover { border-color: #dbb74e; color: #dbb74e; }
     .friend-req-dot { background: #dbb74e; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-left: 4px; position: absolute; top: -2px; right: -2px; }
-    /* friend add inline */
     .friend-add-inline { display: flex; align-items: center; gap: 4px; background: #1a2216; padding: 2px 4px 2px 8px; border-radius: 30px; border: 1px solid #2a3322; }
     .friend-add-inline input { background: transparent; border: none; color: #ede6d6; padding: 4px 0; width: 80px; font-size: 0.75rem; outline: none; }
     .friend-add-inline input:focus { outline: none; }
@@ -236,11 +234,12 @@
 <body>
 
 <div class="paper" id="app">
-
+  <!-- Setup Needed -->
   <div id="setupNeeded" hidden>
     <div class="setup-card"><h1>⚙️ One quick step left</h1><p>Open this file, find <code>firebaseConfig</code> near the top of the script section, and paste in your project's keys.</p></div>
   </div>
 
+  <!-- Auth Screen -->
   <div id="authScreen" class="auth-shell">
     <div class="auth-card">
       <div class="auth-logo">💩</div>
@@ -267,6 +266,7 @@
     </div>
   </div>
 
+  <!-- App Screen -->
   <div id="appScreen" hidden>
     <div class="app-bar">
       <div class="app-wordmark">💩 <span>Shitty Human</span></div>
@@ -294,6 +294,7 @@
       <button class="tab-btn" id="compareTabBtn">Compare</button>
     </div>
 
+    <!-- Rate Panel -->
     <section id="ratePanel" class="panel">
       <div class="card">
         <h2>How shitty was today?<span class="sub" id="rateDateLabel"></span></h2>
@@ -308,6 +309,7 @@
       <div class="stamp-mark" id="stampMark"></div>
     </section>
 
+    <!-- Chat Panel -->
     <section id="chatPanel" class="panel" hidden>
       <div class="chat-type-switcher">
         <button class="chat-type-btn active" data-type="personal">Personal</button>
@@ -362,6 +364,7 @@
       </div>
     </section>
 
+    <!-- Stats Panel -->
     <section id="statsPanel" class="panel" hidden>
       <div class="loading-state" id="statsLoading">Loading your stats…</div>
       <div class="empty-state" id="statsEmpty" hidden><span class="emoji">📭</span>No ratings yet.</div>
@@ -387,6 +390,7 @@
       </div>
     </section>
 
+    <!-- Compare Panel -->
     <section id="comparePanel" class="panel" hidden>
       <div class="friend-switcher" id="compareFriendSwitcher" hidden></div>
       <div class="loading-state" id="compareLoading">Loading…</div>
@@ -407,6 +411,7 @@
       </div>
     </section>
 
+    <!-- Profile Panel -->
     <section id="profilePanel" class="panel" hidden>
       <div class="profile-topbar"><button class="btn-ghost" id="profileBackBtn">← Back</button></div>
       <div class="card">
@@ -434,10 +439,10 @@
     </section>
   </div>
 
+  <!-- Overlays -->
   <div id="dayShareOverlay" class="overlay-shell" hidden>
     <div class="overlay-card"><div class="overlay-card-head"><h2>Share a rated day</h2><button class="overlay-close-btn" id="dayShareCloseBtn">✕</button></div><div class="overlay-scroll" id="dayShareList"></div></div>
   </div>
-
   <div id="createGroupOverlay" class="overlay-shell" hidden>
     <div class="overlay-card"><div class="overlay-card-head"><h2>Create a group</h2><button class="overlay-close-btn" id="createGroupCloseBtn">✕</button></div>
       <div class="field"><label>Group name</label><input id="groupNameInput" maxlength="30" /></div>
@@ -447,13 +452,10 @@
       <div id="createGroupMsg" class="profile-msg" style="margin-top:6px;"></div>
     </div>
   </div>
-
   <div id="notificationOverlay" class="overlay-shell" hidden>
     <div class="overlay-card"><div class="overlay-card-head"><h2>Notifications</h2><button class="overlay-close-btn" id="notifCloseBtn">✕</button></div><div id="notifList"></div></div>
   </div>
-
   <div class="badge-toast-layer" id="badgeToastLayer"></div>
-
   <footer>made for shitty human</footer>
 </div>
 
@@ -493,71 +495,48 @@
     { name: 'Jean-Paul Sartre', url: 'https://raw.githubusercontent.com/Jishnuec/shitty-human/master/Profile/Jean-Paul%20Sartre.jpg' },
     { name: 'Søren Kierkegaard', url: 'https://raw.githubusercontent.com/Jishnuec/shitty-human/master/Profile/S%C3%B8ren%20Kierkegaard.jpg' }
   ];
-  const DEFAULT_AVATAR = '👤';
 
   function bucketFor(n) { if (n<=3) return 'rough'; if (n<=6) return 'meh'; if (n<=8) return 'good'; return 'amazing'; }
   function seriesColor(idx) { return idx === 0 ? '#dbb74e' : '#5c8c6e'; }
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // ── DOM REFS ──
+  // ── DOM REFS (safe) ──
   const $ = id => document.getElementById(id);
-  const setupNeeded = $('setupNeeded'), authScreen = $('authScreen'), appScreen = $('appScreen');
-  const loginTabBtn = $('loginTabBtn'), signupTabBtn = $('signupTabBtn');
-  const loginForm = $('loginForm'), signupForm = $('signupForm');
-  const loginUsername = $('loginUsername'), loginPassword = $('loginPassword');
-  const signupUsername = $('signupUsername'), signupPassword = $('signupPassword');
-  const signupPicGrid = $('signupPicGrid'), signupSubmitBtn = $('signupSubmitBtn');
-  const authError = $('authError'), authLoadingText = $('authLoadingText');
-  const appUsernameChip = $('appUsernameChip'), appAvatarBadge = $('appAvatarBadge'), appUsernameText = $('appUsernameText'), friendReqDot = $('friendReqDot'), friendCountBadge = $('friendCountBadge');
-  const friendAddInput = $('friendAddInput'), friendAddBtn = $('friendAddBtn');
-  const notifBtn = $('notifBtn'), muteBtn = $('muteBtn'), logoutBtn = $('logoutBtn');
-  const rateTabBtn = $('rateTabBtn'), chatTabBtn = $('chatTabBtn'), statsTabBtn = $('statsTabBtn'), compareTabBtn = $('compareTabBtn');
-  const ratePanel = $('ratePanel'), chatPanel = $('chatPanel'), statsPanel = $('statsPanel'), comparePanel = $('comparePanel'), profilePanel = $('profilePanel');
-  const rateDateLabel = $('rateDateLabel'), bigEmoji = $('bigEmoji'), bigEmojiLabel = $('bigEmojiLabel'), stampMark = $('stampMark');
-  const ratingRow = $('ratingRow'), noteInput = $('noteInput'), privacyCheckbox = $('privacyCheckbox'), submitBtn = $('submitBtn');
-  const alreadyRatedNote = $('alreadyRatedNote'), reactionCard = $('reactionCard');
+  const safeEl = (id, fn) => { const el = $(id); if (el) fn(el); };
 
-  const chatTypeSwitcher = $('chatTypeSwitcher'), chatPersonalView = $('chatPersonalView'), chatGroupView = $('chatGroupView');
-  const chatFriendSwitcher = $('chatFriendSwitcher'), chatLoading = $('chatLoading'), chatEmptyState = $('chatEmptyState'), chatContent = $('chatContent');
-  const chatHeaderAvatar = $('chatHeaderAvatar'), chatHeaderName = $('chatHeaderName'), chatHeaderSub = $('chatHeaderSub');
-  const chatMessagesList = $('chatMessagesList'), chatTextInput = $('chatTextInput'), chatSendBtn = $('chatSendBtn'), chatShareDayBtn = $('chatShareDayBtn');
-  const chatLoadEarlierWrap = $('chatLoadEarlierWrap'), chatLoadEarlierBtn = $('chatLoadEarlierBtn');
+  // ── FIREBASE INIT ──
+  let auth, db, firebaseInitialized = false;
+  if (firebaseConfig.apiKey && firebaseConfig.apiKey.indexOf('PASTE_') === -1) {
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    firebaseInitialized = true;
+  } else {
+    const setup = $('setupNeeded');
+    if (setup) setup.hidden = false;
+  }
 
-  const groupList = $('groupList'), groupChatContent = $('groupChatContent'), groupChatAvatar = $('groupChatAvatar'), groupChatName = $('groupChatName'), groupChatSub = $('groupChatSub');
-  const groupMessagesList = $('groupMessagesList'), groupChatTextInput = $('groupChatTextInput'), groupChatSendBtn = $('groupChatSendBtn');
-  const groupChatLoadEarlierWrap = $('groupChatLoadEarlierWrap'), groupChatLoadEarlierBtn = $('groupChatLoadEarlierBtn');
-  const createGroupBtn = $('createGroupBtn'), createGroupOverlay = $('createGroupOverlay'), createGroupCloseBtn = $('createGroupCloseBtn');
-  const groupNameInput = $('groupNameInput'), groupMemberPicker = $('groupMemberPicker'), createGroupConfirmBtn = $('createGroupConfirmBtn'), createGroupMsg = $('createGroupMsg');
+  // ── AUTH HELPERS ──
+  function usernameToEmail(u){return u.trim().toLowerCase().replace(/[^a-z0-9_]/g,'')+'@dayvibe.local';}
+  function friendlyAuthError(e){
+    console.error('Firebase Auth error:', e);
+    const c = e && e.code;
+    if (c === 'auth/email-already-in-use') return 'That username is taken.';
+    if (c === 'auth/weak-password') return 'Password needs at least 6 characters.';
+    if (c === 'auth/invalid-email') return "That username has characters that aren't allowed.";
+    if (c === 'auth/user-not-found' || c === 'auth/wrong-password' || c === 'auth/invalid-credential') return 'Incorrect username or password.';
+    if (c === 'auth/network-request-failed') return 'Network error.';
+    if (c === 'auth/too-many-requests') return 'Too many tries.';
+    return e.message || 'Something went wrong.';
+  }
+  function showAuthError(m){ const el = $('authError'); if(el){ el.textContent=m; el.hidden=false; } }
+  function clearAuthError(){ const el = $('authError'); if(el){ el.hidden=true; el.textContent=''; } }
+  function setAuthLoading(l){ document.querySelectorAll('.auth-submit').forEach(b=>b.disabled=l); const t=$('authLoadingText'); if(t)t.hidden=!l; }
 
-  const statsLoading = $('statsLoading'), statsEmpty = $('statsEmpty'), statsContent = $('statsContent');
-  const statAvg = $('statAvg'), statStreak = $('statStreak'), statLongestStreak = $('statLongestStreak'), statCount = $('statCount');
-  const statBest = $('statBest'), statWorst = $('statWorst');
-  const trendValue = $('trendValue'), bestWeekdayValue = $('bestWeekdayValue'), worstWeekdayValue = $('worstWeekdayValue');
-  const heatmapGrid = $('heatmapGrid'), badgesGrid = $('badgesGrid');
-  const statsLineCanvas = $('statsLineCanvas'), statsDoughnutCanvas = $('statsDoughnutCanvas');
-  const historyList = $('historyList');
+  function showAuthScreen(){ const s=$('setupNeeded'); if(s)s.hidden=true; const a=$('authScreen'); if(a)a.hidden=false; const app=$('appScreen'); if(app)app.hidden=true; }
+  function showAppScreen(){ const s=$('setupNeeded'); if(s)s.hidden=true; const a=$('authScreen'); if(a)a.hidden=true; const app=$('appScreen'); if(app)app.hidden=false; }
 
-  const compareFriendSwitcher = $('compareFriendSwitcher'), compareLoading = $('compareLoading'), compareWaiting = $('compareWaiting'), compareContent = $('compareContent');
-  const badgeAAvatar = $('badgeAAvatar'), badgeAName = $('badgeAName'), badgeAStat = $('badgeAStat');
-  const badgeBAvatar = $('badgeBAvatar'), badgeBName = $('badgeBName'), badgeBStat = $('badgeBStat');
-  const streakBanner = $('streakBanner'), compareVerdict = $('compareVerdict');
-  const compareLineCanvas = $('compareLineCanvas'), compareBarCanvas = $('compareBarCanvas');
-  const compareDoughnutACanvas = $('compareDoughnutACanvas'), compareDoughnutBCanvas = $('compareDoughnutBCanvas');
-
-  const profileBackBtn = $('profileBackBtn'), profileAvatarBig = $('profileAvatarBig'), profilePicGrid = $('profilePicGrid');
-  const profileDisplayNameInput = $('profileDisplayNameInput'), profileDisplayNameSaveBtn = $('profileDisplayNameSaveBtn');
-  const profileUsernameStatic = $('profileUsernameStatic'), profileMsg = $('profileMsg');
-  const shareRatingsToggle = $('shareRatingsToggle'), shareNotesToggle = $('shareNotesToggle');
-  const addFriendInput = $('addFriendInput'), addFriendBtn = $('addFriendBtn'), addFriendMsg = $('addFriendMsg');
-  const incomingRequestsSection = $('incomingRequestsSection'), incomingRequestsList = $('incomingRequestsList');
-  const outgoingRequestsSection = $('outgoingRequestsSection'), outgoingRequestsList = $('outgoingRequestsList');
-  const friendsEmptyMsg = $('friendsEmptyMsg'), friendsListEl = $('friendsListEl');
-  const profileLogoutBtn = $('profileLogoutBtn');
-  const dayShareOverlay = $('dayShareOverlay'), dayShareCloseBtn = $('dayShareCloseBtn'), dayShareList = $('dayShareList');
-  const badgeToastLayer = $('badgeToastLayer');
-  const notificationOverlay = $('notificationOverlay'), notifCloseBtn = $('notifCloseBtn'), notifList = $('notifList');
-
-  let auth, db;
+  // ── STATE ──
   let currentUser = null, currentProfile = null;
   let isSigningUp = false, selectedRating = null, selectedSignupPic = null;
   let soundEnabled = true, reactionTimeout = null;
@@ -587,70 +566,9 @@
   function avgLastNDays(a,n){const c=new Date();c.setDate(c.getDate()-n);const s=toDateStr(c);return avgOf(a.filter(e=>e.date>=s));}
   function bucketCounts(a){const c={rough:0,meh:0,good:0,amazing:0};a.forEach(e=>c[bucketFor(e.rating)]++);return c;}
 
-  // ── AUTH ──
-  function usernameToEmail(u){return u.trim().toLowerCase().replace(/[^a-z0-9_]/g,'')+'@dayvibe.local';}
-  function friendlyAuthError(e){
-    console.error('Firebase Auth error:', e);
-    const c = e && e.code;
-    if (c === 'auth/email-already-in-use') return 'That username is taken.';
-    if (c === 'auth/weak-password') return 'Password needs at least 6 characters.';
-    if (c === 'auth/invalid-email') return "That username has characters that aren't allowed.";
-    if (c === 'auth/user-not-found' || c === 'auth/wrong-password' || c === 'auth/invalid-credential') return 'Incorrect username or password.';
-    if (c === 'auth/network-request-failed') return 'Network error.';
-    if (c === 'auth/too-many-requests') return 'Too many tries.';
-    return e.message || 'Something went wrong.';
-  }
-  function showAuthError(m){authError.textContent=m;authError.hidden=false;}
-  function clearAuthError(){authError.hidden=true;authError.textContent='';}
-  function setAuthLoading(l){document.querySelectorAll('.auth-submit').forEach(b=>b.disabled=l);authLoadingText.hidden=!l;}
-
-  function showAuthScreen(){setupNeeded.hidden=true;appScreen.hidden=true;authScreen.hidden=false;}
-  function showAppScreen(){setupNeeded.hidden=true;authScreen.hidden=true;appScreen.hidden=false;}
-
-  // ── SAFE LISTENER HELPER ──
-  function on(id, event, handler) {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener(event, handler);
-  }
-
-  // ── 🔥 FIREBASE INITIALIZATION ──
-  let firebaseInitialized = false;
-  if (firebaseConfig.apiKey && firebaseConfig.apiKey.indexOf('PASTE_') === -1) {
-    firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.firestore();
-    firebaseInitialized = true;
-  } else {
-    setupNeeded.hidden = false;
-  }
-
-  // ── Auth state listener ──
-  if (firebaseInitialized) {
-    auth.onAuthStateChanged(async function(user) {
-      if (isSigningUp) return;
-      if (user) await loadProfileAndShowApp(user);
-      else showAuthScreen();
-    });
-  }
-
-  // ── Auth tab switching ──
-  loginTabBtn.addEventListener('click', function() {
-    loginTabBtn.classList.add('active');
-    signupTabBtn.classList.remove('active');
-    loginForm.hidden = false;
-    signupForm.hidden = true;
-    clearAuthError();
-  });
-  signupTabBtn.addEventListener('click', function() {
-    signupTabBtn.classList.add('active');
-    loginTabBtn.classList.remove('active');
-    signupForm.hidden = false;
-    loginForm.hidden = true;
-    clearAuthError();
-  });
-
-  // ── Profile picture grid builder ──
+  // ── BUILD PROFILE PIC GRID ──
   function buildPicGrid(container, selectedUrl, onPick) {
+    if (!container) return;
     container.innerHTML = '';
     PROFILE_PICS.forEach(pic => {
       const div = document.createElement('div');
@@ -669,89 +587,23 @@
   }
 
   function markPicSelected(container, url) {
+    if (!container) return;
     Array.from(container.children).forEach(el => {
       const isSelected = (url === null && el.querySelector('span')) ? true : el.querySelector('img')?.src === url;
       el.classList.toggle('selected', isSelected);
     });
   }
 
-  // ── Signup ──
-  signupForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    clearAuthError();
-    if (!firebaseInitialized) return showAuthError('Firebase not initialized.');
-    const username = signupUsername.value.trim();
-    const password = signupPassword.value;
-    if (!/^[a-zA-Z0-9_]{3,15}$/.test(username)) return showAuthError('Username: 3–15 letters, numbers, underscores.');
-    if (password.length < 6) return showAuthError('Password needs at least 6 characters.');
-    if (!selectedSignupPic) return showAuthError('Pick a profile picture.');
-
-    setAuthLoading(true);
-    isSigningUp = true;
-    const email = usernameToEmail(username);
-    let cred;
-    try {
-      cred = await auth.createUserWithEmailAndPassword(email, password);
-    } catch (err) {
-      isSigningUp = false;
-      setAuthLoading(false);
-      return showAuthError(friendlyAuthError(err));
-    }
-
-    try {
-      await db.collection('users').doc(cred.user.uid).set({
-        username,
-        usernameLower: username.toLowerCase(),
-        displayName: username,
-        pic: selectedSignupPic,
-        shareRatings: true,
-        shareNotes: true,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } catch (pErr) {
-      await cred.user.delete().catch(() => {});
-      isSigningUp = false;
-      setAuthLoading(false);
-      return showAuthError('Profile creation failed.');
-    }
-
-    isSigningUp = false;
-    setAuthLoading(false);
-    await loadProfileAndShowApp(cred.user);
-  });
-
-  // ── Login ──
-  loginForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    clearAuthError();
-    if (!firebaseInitialized) return showAuthError('Firebase not initialized.');
-    const username = loginUsername.value.trim();
-    const password = loginPassword.value;
-    if (!username || !password) return showAuthError('Enter username and password.');
-    setAuthLoading(true);
-    try {
-      await auth.signInWithEmailAndPassword(usernameToEmail(username), password);
-    } catch (err) {
-      console.error('Login error:', err);
-      showAuthError(friendlyAuthError(err));
-    }
-    setAuthLoading(false);
-  });
-
-  function resetSocialState() {
-    if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; }
-    if (friendshipsUnsub) { friendshipsUnsub(); friendshipsUnsub = null; }
-    if (groupsUnsub) { groupsUnsub(); groupsUnsub = null; }
-    if (groupMessagesUnsub) { groupMessagesUnsub(); groupMessagesUnsub = null; }
-    myEntries = []; myEntriesLoaded = false;
-    myFriendships = []; friendsList = []; incomingRequests = []; outgoingRequests = [];
-    activeChatFriendUid = null; activeChatPairId = null; chatMessagesCache = []; chatMessageLimit = 40;
-    myGroups = []; activeGroupId = null; groupMessagesCache = []; groupMessageLimit = 40;
+  // ── AUTH STATE LISTENER ──
+  if (firebaseInitialized) {
+    auth.onAuthStateChanged(async function(user) {
+      if (isSigningUp) return;
+      if (user) await loadProfileAndShowApp(user);
+      else showAuthScreen();
+    });
   }
 
-  on('logoutBtn', 'click', function() { resetSocialState(); auth.signOut(); });
-  on('profileLogoutBtn', 'click', function() { resetSocialState(); auth.signOut(); });
-
+  // ── LOAD PROFILE ──
   async function loadProfileAndShowApp(user) {
     currentUser = user;
     const snap = await db.collection('users').doc(user.uid).get();
@@ -773,15 +625,18 @@
   }
 
   function updateHeaderChip() {
-    const avatarEl = appAvatarBadge;
-    if (currentProfile.pic) {
-      avatarEl.innerHTML = '<img src="' + escapeHtml(currentProfile.pic) + '" alt="avatar" />';
-    } else {
-      avatarEl.innerHTML = '<span class="default-avatar">👤</span>';
+    const avatarEl = $('appAvatarBadge');
+    if (avatarEl) {
+      if (currentProfile.pic) {
+        avatarEl.innerHTML = '<img src="' + escapeHtml(currentProfile.pic) + '" alt="avatar" />';
+      } else {
+        avatarEl.innerHTML = '<span class="default-avatar">👤</span>';
+      }
     }
-    appUsernameText.textContent = currentProfile.displayName || currentProfile.username;
-    // update friend count
-    friendCountBadge.textContent = friendsList.length ? ' ('+friendsList.length+')' : '';
+    const nameEl = $('appUsernameText');
+    if (nameEl) nameEl.textContent = currentProfile.displayName || currentProfile.username;
+    const countEl = $('friendCountBadge');
+    if (countEl) countEl.textContent = friendsList.length ? ' ('+friendsList.length+')' : '';
   }
 
   async function runOneTimeMigration() {
@@ -835,8 +690,7 @@
     incomingRequests = await Promise.all(incoming.map(async f => ({ id: f.id, profile: await getProfile(other(f)) })));
     outgoingRequests = await Promise.all(outgoing.map(async f => ({ id: f.id, profile: await getProfile(other(f)) })));
 
-    // update friend count in header
-    friendCountBadge.textContent = friendsList.length ? ' ('+friendsList.length+')' : '';
+    updateHeaderChip();
     if (!profilePanel.hidden) renderProfilePanel();
     if (currentTab === 'chat') loadChatTab();
     if (currentTab === 'compare') loadCompareTab();
@@ -845,67 +699,13 @@
 
   function updateNotificationDot() {
     const count = incomingRequests.length;
-    friendReqDot.hidden = count === 0;
-    notifBtn.textContent = count > 0 ? '🔔' + count : '🔔';
+    const dot = $('friendReqDot');
+    if (dot) dot.hidden = count === 0;
+    const notif = $('notifBtn');
+    if (notif) notif.textContent = count > 0 ? '🔔' + count : '🔔';
   }
 
-  // ── Friend add inline ──
-  friendAddBtn.addEventListener('click', async function() {
-    const uname = friendAddInput.value.trim();
-    if (!uname) return;
-    friendAddBtn.disabled = true;
-    const res = await sendFriendRequest(uname);
-    // Show feedback temporarily
-    if (res.ok) {
-      friendAddInput.value = '';
-      // Show a small temporary success message
-      const oldPlaceholder = friendAddInput.placeholder;
-      friendAddInput.placeholder = '✓ sent!';
-      setTimeout(() => { friendAddInput.placeholder = oldPlaceholder; }, 2000);
-    } else {
-      // show error in placeholder
-      friendAddInput.placeholder = '✗ ' + res.msg;
-      setTimeout(() => { friendAddInput.placeholder = 'Add friend'; }, 3000);
-    }
-    friendAddBtn.disabled = false;
-  });
-
-  friendAddInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') friendAddBtn.click();
-  });
-
-  // ── Notification overlay ──
-  on('notifBtn', 'click', function() {
-    renderNotificationList();
-    notificationOverlay.hidden = false;
-  });
-  on('notifCloseBtn', 'click', function() { notificationOverlay.hidden = true; });
-
-  function renderNotificationList() {
-    notifList.innerHTML = '';
-    if (incomingRequests.length === 0) {
-      notifList.innerHTML = '<div class="empty-state" style="padding:1rem;">No notifications.</div>';
-      return;
-    }
-    incomingRequests.forEach(r => {
-      const item = document.createElement('div');
-      item.className = 'friend-row';
-      const avatarHtml = r.profile.pic ? '<img src="' + escapeHtml(r.profile.pic) + '" style="width:32px;height:32px;border-radius:50%;" />' : '👤';
-      item.innerHTML = '<span style="font-size:1.2rem;">' + avatarHtml + '</span><span class="friend-row-name">' + escapeHtml(r.profile.displayName || r.profile.username) + ' wants to be friends</span><span class="friend-row-actions">';
-      const acceptBtn = document.createElement('button');
-      acceptBtn.className = 'btn-chip accept';
-      acceptBtn.textContent = 'Accept';
-      acceptBtn.addEventListener('click', function() { acceptFriendRequest(r.id); });
-      const declineBtn = document.createElement('button');
-      declineBtn.className = 'btn-chip decline';
-      declineBtn.textContent = 'Decline';
-      declineBtn.addEventListener('click', function() { endFriendship(r.id); });
-      item.querySelector('.friend-row-actions').appendChild(acceptBtn);
-      item.querySelector('.friend-row-actions').appendChild(declineBtn);
-      notifList.appendChild(item);
-    });
-  }
-
+  // ── FRIEND REQUEST ──
   async function sendFriendRequest(usernameRaw) {
     const uname = (usernameRaw || '').trim();
     if (!uname) return { ok: false, msg: 'Enter a username.' };
@@ -942,15 +742,18 @@
 
   async function acceptFriendRequest(pairId) {
     try { await db.collection('friendships').doc(pairId).update({ status: 'accepted', respondedAt: firebase.firestore.FieldValue.serverTimestamp() }); } catch (e) {}
-    notificationOverlay.hidden = true;
+    const overlay = $('notificationOverlay');
+    if (overlay) overlay.hidden = true;
   }
 
   async function endFriendship(pairId) {
     try { await db.collection('friendships').doc(pairId).delete(); } catch (e) {}
-    notificationOverlay.hidden = true;
+    const overlay = $('notificationOverlay');
+    if (overlay) overlay.hidden = true;
   }
 
   function buildFriendSwitcher(container, activeUid, onSelect) {
+    if (!container) return;
     if (friendsList.length <= 1) { container.hidden = true; container.innerHTML = ''; return; }
     container.hidden = false;
     container.innerHTML = '';
@@ -965,9 +768,621 @@
     });
   }
 
-  // ── PROFILE ──
+  // ── GROUPS ──
+  function attachGroupsListener() {
+    if (groupsUnsub) return;
+    groupsUnsub = db.collection('groups')
+      .where('members', 'array-contains', currentUser.uid)
+      .onSnapshot(function(snap) {
+        myGroups = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+        if (currentTab === 'chat') loadGroupsList();
+      }, function() {});
+  }
+
+  function loadGroupsList() {
+    const container = $('groupList');
+    if (!container) return;
+    container.innerHTML = '';
+    if (myGroups.length === 0) {
+      container.innerHTML = '<div class="empty-state" style="padding:0.5rem 0;">No groups yet. Create one!</div>';
+      return;
+    }
+    myGroups.forEach(g => {
+      const div = document.createElement('div');
+      div.className = 'group-list-item' + (g.id === activeGroupId ? ' active' : '');
+      div.textContent = g.name || 'Unnamed group';
+      div.addEventListener('click', function() {
+        activeGroupId = g.id;
+        openGroupChat(g.id);
+      });
+      container.appendChild(div);
+    });
+  }
+
+  function openGroupChat(groupId) {
+    const group = myGroups.find(g => g.id === groupId);
+    if (!group) return;
+    const nameEl = $('groupChatName');
+    if (nameEl) nameEl.textContent = group.name || 'Group';
+    const subEl = $('groupChatSub');
+    if (subEl) subEl.textContent = group.members.length + ' members';
+    const content = $('groupChatContent');
+    if (content) content.hidden = false;
+    if (groupMessagesUnsub) { groupMessagesUnsub(); groupMessagesUnsub = null; }
+    groupMessagesCache = [];
+    groupMessageLimit = 40;
+    groupMessagesUnsub = db.collection('groups').doc(groupId).collection('messages').orderBy('timestamp', 'desc').limit(groupMessageLimit).onSnapshot(function(snap) {
+      const msgs = snap.docs.map(d => Object.assign({ id: d.id }, d.data())).reverse();
+      groupMessagesCache = msgs;
+      renderGroupMessages(msgs);
+      const wrap = $('groupChatLoadEarlierWrap');
+      if (wrap) wrap.hidden = !(msgs.length >= groupMessageLimit);
+    }, function() {});
+    // highlight active
+    document.querySelectorAll('.group-list-item').forEach(el => el.classList.remove('active'));
+    const items = container.querySelectorAll('.group-list-item');
+    items.forEach(el => {
+      if (el.textContent === group.name) el.classList.add('active');
+    });
+  }
+
+  function renderGroupMessages(msgs) {
+    const list = $('groupMessagesList');
+    if (!list) return;
+    list.innerHTML = '';
+    msgs.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'chat-message ' + (m.authorId === currentUser.uid ? 'mine' : 'theirs');
+      let html = escapeHtml(m.text || '');
+      if (m.type === 'day_share' && m.data) {
+        const d = m.data;
+        html = '📅 <strong>shared a day</strong> — ' + d.rating + '/10 ' + (d.note ? '"' + escapeHtml(d.note) + '"' : '') + ' (' + formatDate(d.date) + ')';
+      }
+      div.innerHTML = html + '<div class="meta">' + formatTimestamp(m.timestamp) + ' · ' + escapeHtml(m.authorName || '') + '</div>';
+      if (m.reactions && Object.keys(m.reactions).length) {
+        const rDiv = document.createElement('div');
+        rDiv.className = 'reactions';
+        Object.keys(m.reactions).forEach(emoji => {
+          const b = document.createElement('button');
+          b.textContent = emoji;
+          b.dataset.msgId = m.id;
+          b.dataset.emoji = emoji;
+          b.addEventListener('click', function() { toggleReaction(m.id, emoji, 'group'); });
+          rDiv.appendChild(b);
+          const count = document.createElement('span');
+          count.textContent = m.reactions[emoji];
+          rDiv.appendChild(count);
+        });
+        div.appendChild(rDiv);
+      }
+      list.appendChild(div);
+    });
+    list.scrollTop = list.scrollHeight;
+  }
+
+  async function toggleReaction(msgId, emoji, type) {
+    let ref;
+    if (type === 'personal') {
+      ref = db.collection('chats').doc(activeChatPairId).collection('messages').doc(msgId);
+    } else {
+      ref = db.collection('groups').doc(activeGroupId).collection('messages').doc(msgId);
+    }
+    try {
+      await db.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        if (!snap.exists) return;
+        const data = snap.data();
+        const reactions = data.reactions || {};
+        if (reactions[emoji]) {
+          const users = reactions[emoji].users || [];
+          const idx = users.indexOf(currentUser.uid);
+          if (idx > -1) {
+            users.splice(idx, 1);
+            if (users.length === 0) delete reactions[emoji];
+            else reactions[emoji].users = users;
+          }
+        } else {
+          reactions[emoji] = { count: 1, users: [currentUser.uid] };
+        }
+        tx.update(ref, { reactions });
+      });
+    } catch (e) {}
+  }
+
+  // ── CHAT ──
+  async function loadChatTab() {
+    const loading = $('chatLoading');
+    const empty = $('chatEmptyState');
+    const content = $('chatContent');
+    const personalView = $('chatPersonalView');
+    const groupView = $('chatGroupView');
+
+    if (friendsList.length === 0) {
+      if (loading) loading.hidden = true;
+      if (empty) empty.hidden = false;
+      if (personalView) personalView.hidden = false;
+      if (groupView) groupView.hidden = true;
+      if (content) content.hidden = true;
+      return;
+    }
+    if (loading) loading.hidden = false;
+    if (empty) empty.hidden = true;
+    if (content) content.hidden = true;
+    if (personalView) personalView.hidden = false;
+    if (groupView) groupView.hidden = true;
+
+    if (!activeChatFriendUid || !friendsList.some(f => f.uid === activeChatFriendUid)) activeChatFriendUid = friendsList[0].uid;
+    const switcher = $('chatFriendSwitcher');
+    buildFriendSwitcher(switcher, activeChatFriendUid, function(uid) { activeChatFriendUid = uid; loadChatTab(); });
+    const friend = friendsList.find(f => f.uid === activeChatFriendUid);
+    const avatar = $('chatHeaderAvatar');
+    if (avatar) avatar.innerHTML = friend.pic ? '<img src="' + escapeHtml(friend.pic) + '" style="width:32px;height:32px;border-radius:50%;" />' : '👤';
+    const name = $('chatHeaderName');
+    if (name) name.textContent = friend.displayName || friend.username;
+    const sub = $('chatHeaderSub');
+    if (sub) sub.textContent = 'online';
+    if (loading) loading.hidden = true;
+    if (content) content.hidden = false;
+
+    const pairId = makePairId(currentUser.uid, friend.uid);
+    activeChatPairId = pairId;
+    if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; }
+    chatMessagesCache = [];
+    chatMessageLimit = 40;
+    chatMessagesUnsub = db.collection('chats').doc(pairId).collection('messages').orderBy('timestamp', 'desc').limit(chatMessageLimit).onSnapshot(function(snap) {
+      const msgs = snap.docs.map(d => Object.assign({ id: d.id }, d.data())).reverse();
+      chatMessagesCache = msgs;
+      renderChatMessages(msgs);
+      const wrap = $('chatLoadEarlierWrap');
+      if (wrap) wrap.hidden = !(msgs.length >= chatMessageLimit);
+    }, function() { if (sub) sub.textContent = 'offline'; });
+
+    loadGroupsList();
+  }
+
+  function renderChatMessages(msgs) {
+    const list = $('chatMessagesList');
+    if (!list) return;
+    list.innerHTML = '';
+    msgs.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'chat-message ' + (m.authorId === currentUser.uid ? 'mine' : 'theirs');
+      let html = escapeHtml(m.text || '');
+      if (m.type === 'day_share' && m.data) {
+        const d = m.data;
+        html = '📅 <strong>shared a day</strong> — ' + d.rating + '/10 ' + (d.note ? '"' + escapeHtml(d.note) + '"' : '') + ' (' + formatDate(d.date) + ')';
+      }
+      div.innerHTML = html + '<div class="meta">' + formatTimestamp(m.timestamp) + ' · ' + escapeHtml(m.authorName || '') + '</div>';
+      if (m.reactions && Object.keys(m.reactions).length) {
+        const rDiv = document.createElement('div');
+        rDiv.className = 'reactions';
+        Object.keys(m.reactions).forEach(emoji => {
+          const b = document.createElement('button');
+          b.textContent = emoji;
+          b.dataset.msgId = m.id;
+          b.dataset.emoji = emoji;
+          b.addEventListener('click', function() { toggleReaction(m.id, emoji, 'personal'); });
+          rDiv.appendChild(b);
+          const count = document.createElement('span');
+          count.textContent = m.reactions[emoji];
+          rDiv.appendChild(count);
+        });
+        div.appendChild(rDiv);
+      }
+      list.appendChild(div);
+    });
+    list.scrollTop = list.scrollHeight;
+  }
+
+  // ── RATE ──
+  function selectRating(n) {
+    selectedRating = n;
+    document.querySelectorAll('.rating-btn').forEach(b => b.classList.toggle('selected', Number(b.dataset.value) === n));
+    const emoji = $('bigEmoji');
+    const label = $('bigEmojiLabel');
+    if (n) {
+      if (emoji) emoji.textContent = EMOJI_BY_RATING[n];
+      if (label) label.textContent = n + ' — ' + LABEL_BY_RATING[n];
+      if (emoji) { emoji.classList.remove('pop'); void emoji.offsetWidth; emoji.classList.add('pop'); }
+    } else {
+      if (emoji) emoji.textContent = '❓';
+      if (label) label.textContent = 'Pick a number below';
+    }
+    const btn = $('submitBtn');
+    if (btn) btn.disabled = !n;
+  }
+
+  async function loadRateTab() {
+    const dateLabel = $('rateDateLabel');
+    if (dateLabel) dateLabel.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+    const docId = currentUser.uid + '_' + todayStr();
+    const snap = await db.collection('ratings').doc(docId).get();
+    todayDocExists = snap.exists;
+    if (snap.exists) {
+      const d = snap.data();
+      selectRating(d.rating);
+      const note = $('noteInput');
+      if (note) note.value = d.note || '';
+      const priv = $('privacyCheckbox');
+      if (priv) priv.checked = !!d.private;
+      const submit = $('submitBtn');
+      if (submit) submit.textContent = "Update today's shittiness";
+      const already = $('alreadyRatedNote');
+      if (already) already.hidden = false;
+    } else {
+      selectRating(null);
+      const note = $('noteInput');
+      if (note) note.value = '';
+      const priv = $('privacyCheckbox');
+      if (priv) priv.checked = false;
+      const submit = $('submitBtn');
+      if (submit) submit.textContent = "Log today's shittiness";
+      const already = $('alreadyRatedNote');
+      if (already) already.hidden = true;
+    }
+    const reaction = $('reactionCard');
+    if (reaction) reaction.classList.remove('show');
+    const stamp = $('stampMark');
+    if (stamp) stamp.classList.remove('show');
+  }
+
+  // ── STATS ──
+  async function loadStatsTab() {
+    const loading = $('statsLoading');
+    const empty = $('statsEmpty');
+    const content = $('statsContent');
+    if (loading) loading.hidden = false;
+    if (content) content.hidden = true;
+    if (empty) empty.hidden = true;
+    await fetchMyEntries(true);
+    if (loading) loading.hidden = true;
+    if (myEntries.length === 0) {
+      if (empty) empty.hidden = false;
+      return;
+    }
+    if (content) content.hidden = false;
+    const e = myEntries;
+    const avg = avgOf(e);
+    const best = e.reduce((a, b) => b.rating > a.rating ? b : a);
+    const worst = e.reduce((a, b) => b.rating < a.rating ? b : a);
+    const avgEl = $('statAvg'); if (avgEl) avgEl.textContent = avg.toFixed(1);
+    const streakEl = $('statStreak'); if (streakEl) streakEl.textContent = computeStreak(e) + '🔥';
+    const longestEl = $('statLongestStreak'); if (longestEl) longestEl.textContent = longestStreak(e) + '🏅';
+    const countEl = $('statCount'); if (countEl) countEl.textContent = e.length;
+    const bestEl = $('statBest'); if (bestEl) bestEl.textContent = EMOJI_BY_RATING[best.rating] + ' ' + best.rating + ' · ' + formatDate(best.date);
+    const worstEl = $('statWorst'); if (worstEl) worstEl.textContent = EMOJI_BY_RATING[worst.rating] + ' ' + worst.rating + ' · ' + formatDate(worst.date);
+
+    const trend = computeTrend(e);
+    const trendEl = $('trendValue');
+    if (trendEl) {
+      if (trend) {
+        if (trend.delta > 0.05) trendEl.innerHTML = 'Up <b>+' + trend.delta.toFixed(1) + '</b> — ' + trend.thisWeek.toFixed(1) + ' vs ' + trend.lastWeek.toFixed(1);
+        else if (trend.delta < -0.05) trendEl.innerHTML = 'Down <b>' + trend.delta.toFixed(1) + '</b> — ' + trend.thisWeek.toFixed(1) + ' vs ' + trend.lastWeek.toFixed(1);
+        else trendEl.innerHTML = 'Steady around <b>' + trend.thisWeek.toFixed(1) + '</b>';
+      } else {
+        trendEl.textContent = 'Log a full week to see your trend.';
+      }
+    }
+
+    const wd = computeWeekdayStats(e);
+    const bestWeekday = $('bestWeekdayValue');
+    const worstWeekday = $('worstWeekdayValue');
+    if (wd && wd.enoughVariety) {
+      if (bestWeekday) bestWeekday.innerHTML = "Happiest on <b>" + wd.best.day + 's</b> (' + wd.best.avg.toFixed(1) + ')';
+      if (worstWeekday) worstWeekday.innerHTML = '<b>' + wd.worst.day + 's</b> are rough (' + wd.worst.avg.toFixed(1) + ')';
+    } else {
+      if (bestWeekday) bestWeekday.textContent = 'Rate more days to see patterns.';
+      if (worstWeekday) worstWeekday.textContent = 'Rate more days to see patterns.';
+    }
+
+    renderHeatmap(e);
+    await refreshBadges(e);
+
+    drawLineChart($('statsLineCanvas'), [{ label: currentProfile.displayName || currentProfile.username, color: seriesColor(0), data: e }], statsChart, c => statsChart = c);
+    drawDoughnut($('statsDoughnutCanvas'), e, statsDoughnut, c => statsDoughnut = c);
+
+    const history = $('historyList');
+    if (history) {
+      history.innerHTML = '';
+      e.slice().reverse().forEach(r => {
+        const li = document.createElement('li');
+        li.className = 'history-item';
+        li.innerHTML = '<span class="history-emoji">' + EMOJI_BY_RATING[r.rating] + '</span><span class="history-main"><span class="history-date">' + formatDate(r.date) + (r.private ? ' 🔒' : '') + '</span>' + (r.note ? '<span class="history-note">' + escapeHtml(r.note) + '</span>' : '') + '</span><span class="history-rating">' + r.rating + '</span>';
+        history.appendChild(li);
+      });
+    }
+    refreshMoodFromEntries(e);
+  }
+
+  function renderHeatmap(entries) {
+    const grid = $('heatmapGrid');
+    if (!grid) return;
+    const weeks = 14;
+    const map = {};
+    entries.forEach(e => map[e.date] = e.rating);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const dow = today.getDay();
+    const lastSunday = new Date(today); lastSunday.setDate(today.getDate() - dow);
+    const firstSunday = new Date(lastSunday); firstSunday.setDate(lastSunday.getDate() - (weeks-1)*7);
+    grid.innerHTML = '';
+    for (let w=0; w<weeks; w++) {
+      for (let d=0; d<7; d++) {
+        const cellDate = new Date(firstSunday);
+        cellDate.setDate(firstSunday.getDate() + w*7 + d);
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell';
+        if (cellDate > today) { cell.classList.add('future'); grid.appendChild(cell); continue; }
+        const ds = toDateStr(cellDate);
+        const rating = map[ds];
+        if (typeof rating === 'number') {
+          cell.classList.add(bucketFor(rating));
+          cell.title = formatDate(ds) + ' — ' + rating + '/10';
+        } else {
+          cell.title = formatDate(ds) + ' — not rated';
+        }
+        grid.appendChild(cell);
+      }
+    }
+  }
+
+  function computeTrend(e) {
+    const now = new Date();
+    const thisStart = new Date(now); thisStart.setDate(now.getDate() - 6);
+    const lastEnd = new Date(thisStart); lastEnd.setDate(thisStart.getDate() - 1);
+    const lastStart = new Date(lastEnd); lastStart.setDate(lastEnd.getDate() - 6);
+    const inRange = (d, a, b) => d >= toDateStr(a) && d <= toDateStr(b);
+    const tw = e.filter(x => inRange(x.date, thisStart, now));
+    const lw = e.filter(x => inRange(x.date, lastStart, lastEnd));
+    if (tw.length === 0 || lw.length === 0) return null;
+    return { thisWeek: avgOf(tw), lastWeek: avgOf(lw), delta: avgOf(tw) - avgOf(lw) };
+  }
+
+  function computeWeekdayStats(e) {
+    const by = {};
+    e.forEach(r => { const w = dayOfWeekName(r.date); (by[w] = by[w] || []).push(r.rating); });
+    const avgs = Object.keys(by).map(w => ({ day: w, avg: by[w].reduce((a, b) => a + b, 0) / by[w].length }));
+    if (!avgs.length) return null;
+    avgs.sort((a, b) => b.avg - a.avg);
+    return { best: avgs[0], worst: avgs[avgs.length - 1], enoughVariety: avgs.length >= 2 };
+  }
+
+  // ── COMPARE ──
+  async function loadCompareTab() {
+    const loading = $('compareLoading');
+    const waiting = $('compareWaiting');
+    const content = $('compareContent');
+    const switcher = $('compareFriendSwitcher');
+    if (loading) loading.hidden = false;
+    if (content) content.hidden = true;
+    if (waiting) waiting.hidden = true;
+    if (friendsList.length === 0) {
+      if (loading) loading.hidden = true;
+      if (waiting) waiting.hidden = false;
+      if (switcher) switcher.hidden = true;
+      return;
+    }
+    if (!activeCompareFriendUid || !friendsList.some(f => f.uid === activeCompareFriendUid)) activeCompareFriendUid = friendsList[0].uid;
+    buildFriendSwitcher(switcher, activeCompareFriendUid, function(uid) { activeCompareFriendUid = uid; loadCompareTab(); });
+    const friend = friendsList.find(f => f.uid === activeCompareFriendUid);
+    await fetchMyEntries(true);
+    const friendEntries = await fetchFriendVisibleEntries(friend.uid);
+    if (loading) loading.hidden = true;
+    if (content) content.hidden = false;
+    const myE = myEntries, frE = friendEntries;
+    const myName = currentProfile.displayName || currentProfile.username;
+    const frName = friend.displayName || friend.username;
+    const aAvatar = $('badgeAAvatar');
+    if (aAvatar) aAvatar.innerHTML = currentProfile.pic ? '<img src="' + escapeHtml(currentProfile.pic) + '" style="width:100%;height:100%;object-fit:cover;" />' : '👤';
+    const bAvatar = $('badgeBAvatar');
+    if (bAvatar) bAvatar.innerHTML = friend.pic ? '<img src="' + escapeHtml(friend.pic) + '" style="width:100%;height:100%;object-fit:cover;" />' : '👤';
+    const aName = $('badgeAName'); if (aName) aName.textContent = myName;
+    const bName = $('badgeBName'); if (bName) bName.textContent = frName;
+
+    const [bA, bB] = await Promise.all([fetchBadgeCount(currentUser.uid), fetchBadgeCount(friend.uid)]);
+    const aStat = $('badgeAStat'); if (aStat) aStat.textContent = avgOf(myE).toFixed(1) + ' avg · ' + computeStreak(myE) + '🔥 · 🎖' + bA;
+    const bStat = $('badgeBStat'); if (bStat) bStat.textContent = avgOf(frE).toFixed(1) + ' avg · ' + computeStreak(frE) + '🔥 · 🎖' + bB;
+
+    const streak = computeWinningStreak(myE, frE);
+    const streakBanner = $('streakBanner');
+    if (streakBanner) {
+      if (streak.winner === null) {
+        streakBanner.textContent = (myE.length && frE.length) ? "Dead even — nobody's on a streak." : 'Not enough days yet.';
+      } else {
+        const name = streak.winner === 'A' ? myName : frName;
+        streakBanner.textContent = name + ' is on fire — ahead ' + streak.count + ' day' + (streak.count === 1 ? '' : 's') + ' in a row!';
+      }
+    }
+
+    const a7 = avgLastNDays(myE, 7), b7 = avgLastNDays(frE, 7);
+    const verdict = $('compareVerdict');
+    if (verdict) {
+      if (myE.length === 0 || frE.length === 0) {
+        verdict.textContent = "Not enough data yet — log a few days!";
+      } else if (Math.abs(a7 - b7) < 0.15) {
+        verdict.textContent = 'Even this week — both around ' + a7.toFixed(1);
+      } else if (a7 > b7) {
+        verdict.textContent = myName + ' is ahead this week, ' + a7.toFixed(1) + ' vs ' + b7.toFixed(1);
+      } else {
+        verdict.textContent = frName + ' is ahead this week, ' + b7.toFixed(1) + ' vs ' + a7.toFixed(1);
+      }
+    }
+
+    drawLineChart($('compareLineCanvas'), [{ label: myName, color: seriesColor(0), data: myE }, { label: frName, color: seriesColor(1), data: frE }], compareChart, c => compareChart = c);
+    if (compareBar) compareBar.destroy();
+    const bestA = myE.length ? Math.max.apply(null, myE.map(e => e.rating)) : 0;
+    const bestB = frE.length ? Math.max.apply(null, frE.map(e => e.rating)) : 0;
+    compareBar = new Chart($('compareBarCanvas').getContext('2d'), {
+      type: 'bar',
+      data: { labels: ['Average', 'Best day'], datasets: [ { label: myName, data: [avgOf(myE), bestA], backgroundColor: seriesColor(0), borderRadius: 5 }, { label: frName, data: [avgOf(frE), bestB], backgroundColor: seriesColor(1), borderRadius: 5 } ] },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 10, ticks: { color: '#b7af9c' }, grid: { color: 'rgba(237,230,214,0.06)' } }, x: { ticks: { color: '#b7af9c' }, grid: { display: false } } }, plugins: { legend: { position: 'bottom', labels: { color: '#ede6d6', font: { family: 'IBM Plex Sans' } } } } }
+    });
+    drawDoughnut($('compareDoughnutACanvas'), myE, compareDoughnutA, c => compareDoughnutA = c);
+    drawDoughnut($('compareDoughnutBCanvas'), frE, compareDoughnutB, c => compareDoughnutB = c);
+  }
+
+  function computeWinningStreak(a, b) {
+    const mA = {}; a.forEach(e => mA[e.date] = e.rating);
+    const mB = {}; b.forEach(e => mB[e.date] = e.rating);
+    const common = Object.keys(mA).filter(d => d in mB).sort().reverse();
+    if (!common.length) return { winner: null, count: 0 };
+    let leader = null, count = 0;
+    for (const d of common) {
+      const A = mA[d], B = mB[d];
+      if (A === B) break;
+      const day = A > B ? 'A' : 'B';
+      if (leader === null) { leader = day; count = 1; }
+      else if (day === leader) count++;
+      else break;
+    }
+    return { winner: leader, count };
+  }
+
+  // ── BADGES ──
+  function consecutiveDateRuns(entries) { const runs=[]; let cur=[]; for(let i=0;i<entries.length;i++){if(cur.length===0){cur.push(entries[i]);continue;}const prev=cur[cur.length-1].date;const [y,m,d]=prev.split('-').map(Number);const exp=toDateStr(new Date(y,m-1,d+1));if(entries[i].date===exp)cur.push(entries[i]);else{runs.push(cur);cur=[entries[i]];}}if(cur.length)runs.push(cur);return runs; }
+  function hasSlump(e){return consecutiveDateRuns(e).some(run=>{for(let i=0;i+2<run.length;i++)if(run[i].rating<4&&run[i+1].rating<4&&run[i+2].rating<4)return true;return false;});}
+  function hasConsistent(e){return consecutiveDateRuns(e).some(run=>{for(let i=0;i+6<run.length;i++){let ok=true;for(let j=i;j<i+7;j++)if(run[j].rating<5||run[j].rating>6){ok=false;break;}if(ok)return true;}return false;});}
+  function hasPartyAnimal(e){return e.some(x=>x.rating===10&&dayOfWeekName(x.date)==='Friday');}
+  function hasMoody(e){for(let i=1;i<e.length;i++)if(Math.abs(e[i].rating-e[i-1].rating)>=5)return true;return false;}
+  function hasEarlyBird(e){return e.some(x=>typeof x.ratedAtHour==='number'&&x.ratedAtHour<9);}
+  function hasNightOwl(e){return e.some(x=>typeof x.ratedAtHour==='number'&&x.ratedAtHour>=23);}
+  function hasCentury(e){return e.length>=100;}
+  function hasTagTeam(e,ctx){return !!(ctx&&ctx.hasFriend);}
+  const BADGE_DEFS = [
+    {id:'slump',emoji:'🌧️',name:'The Slump',desc:'3 days below 4',check:hasSlump},
+    {id:'consistent',emoji:'🧘',name:'Mr. Consistent',desc:'7 days 5-6',check:hasConsistent},
+    {id:'party',emoji:'🎉',name:'Party Animal',desc:'10 on a Friday',check:hasPartyAnimal},
+    {id:'moody',emoji:'🎭',name:'Moody',desc:'5+ point swing',check:hasMoody},
+    {id:'early_bird',emoji:'🐦',name:'Early Bird',desc:'Rated before 9am',check:hasEarlyBird},
+    {id:'night_owl',emoji:'🦉',name:'Night Owl',desc:'Rated after 11pm',check:hasNightOwl},
+    {id:'century',emoji:'💯',name:'Century Club',desc:'100 days logged',check:hasCentury},
+    {id:'tag_team',emoji:'🤝',name:'Tag Team',desc:'Have a friend',check:hasTagTeam}
+  ];
+  async function refreshBadges(entries){const ref=db.collection('users').doc(currentUser.uid).collection('badges');const existing=await ref.get();const unlocked=new Set(existing.docs.map(d=>d.id));const newly=[];const ctx={hasFriend:friendsList.length>0};for(const def of BADGE_DEFS){if(unlocked.has(def.id))continue;if(def.check(entries,ctx)){try{await ref.doc(def.id).set({unlockedAt:firebase.firestore.FieldValue.serverTimestamp()});unlocked.add(def.id);newly.push(def);}catch(e){}}}renderBadgeGrid(unlocked);newly.forEach(def=>celebrateBadge(def));}
+  function renderBadgeGrid(unlocked){const grid=$('badgesGrid');if(!grid)return;grid.innerHTML='';BADGE_DEFS.forEach(def=>{const u=unlocked.has(def.id);const tile=document.createElement('div');tile.className='badge-tile '+(u?'unlocked':'locked');tile.innerHTML='<span class="badge-emoji">'+def.emoji+'</span><div class="badge-name">'+escapeHtml(def.name)+'</div><div class="badge-desc">'+escapeHtml(def.desc)+'</div>';grid.appendChild(tile);});}
+  function celebrateBadge(def){playBadgeSound();launchConfetti(20);const toast=document.createElement('div');toast.className='badge-toast';toast.innerHTML='<span class="icon">'+def.emoji+'</span><span class="text"><strong>Badge unlocked!</strong>'+escapeHtml(def.name)+'</span>';const layer=$('badgeToastLayer');if(layer)layer.appendChild(toast);setTimeout(()=>toast.remove(),4000);}
+
+  // ── CHART HELPERS ──
+  function drawLineChart(canvas, series, existing, setter) {
+    if (!canvas) return;
+    if (existing) existing.destroy();
+    const allDates = Array.from(new Set(series.flatMap(s => s.data.map(e => e.date)))).sort();
+    const datasets = series.map(s => {
+      const by = {}; s.data.forEach(e => by[e.date] = e.rating);
+      return {
+        label: s.label,
+        data: allDates.map(d => d in by ? by[d] : null),
+        spanGaps: true,
+        borderColor: s.color,
+        backgroundColor: s.color + '33',
+        pointBackgroundColor: s.color,
+        pointRadius: 3,
+        tension: 0.3,
+        fill: true
+      };
+    });
+    const chart = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: { labels: allDates.map(formatDateShort), datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { min: 1, max: 10, ticks: { stepSize: 1, color: '#b7af9c', font: { family: 'IBM Plex Mono' } }, grid: { color: 'rgba(237,230,214,0.06)' } },
+          x: { ticks: { color: '#b7af9c', maxRotation: 0, autoSkip: true, font: { family: 'IBM Plex Mono' } }, grid: { display: false } }
+        },
+        plugins: {
+          legend: { display: series.length > 1, labels: { color: '#ede6d6', font: { family: 'IBM Plex Sans' } } },
+          tooltip: { mode: 'index', intersect: false }
+        },
+        interaction: { mode: 'index', intersect: false }
+      }
+    });
+    setter(chart);
+  }
+
+  function drawDoughnut(canvas, entries, existing, setter) {
+    if (!canvas) return;
+    if (existing) existing.destroy();
+    const counts = bucketCounts(entries);
+    const keys = Object.keys(BUCKET_META);
+    const chart = new Chart(canvas.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: keys.map(k => BUCKET_META[k].label),
+        datasets: [{ data: keys.map(k => counts[k]), backgroundColor: keys.map(k => BUCKET_META[k].color), borderColor: '#1e261a', borderWidth: 2 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#ede6d6', padding: 8, font: { size: 10, family: 'IBM Plex Sans' } } }
+        }
+      }
+    });
+    setter(chart);
+  }
+
+  // ── FETCH HELPERS ──
+  async function fetchMyEntries(force) {
+    if (myEntriesLoaded && !force) return myEntries;
+    const snap = await db.collection('ratings').where('uid', '==', currentUser.uid).get();
+    myEntries = snap.docs.map(d => d.data()).sort((a, b) => a.date.localeCompare(b.date));
+    myEntriesLoaded = true;
+    return myEntries;
+  }
+
+  async function fetchFriendVisibleEntries(uid) {
+    const p = await getProfile(uid);
+    if (p.shareRatings === false) return [];
+    const snap = await db.collection('ratings').where('uid', '==', uid).where('private', '==', false).get();
+    return snap.docs.map(d => d.data()).sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  async function fetchBadgeCount(uid) {
+    const snap = await db.collection('users').doc(uid).collection('badges').get();
+    return snap.size;
+  }
+
+  // ── MOOD THEMING ──
+  function hexToRgb(h) { const x = h.replace('#', ''); const full = x.length === 3 ? x.split('').map(c => c + c).join('') : x; const n = parseInt(full, 16); return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }; }
+  function rgbToHex(r, g, b) { const c = v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0'); return '#' + c(r) + c(g) + c(b); }
+  function lerpColor(a, b, t) { const A = hexToRgb(a), B = hexToRgb(b); return rgbToHex(A.r + (B.r - A.r) * t, A.g + (B.g - A.g) * t, A.b + (B.b - A.b) * t); }
+  let currentMoodHex = '#8f7f55', currentMoodBucket = 'calm', moodAnimId = null;
+  function animateToMoodBucket(bucket) {
+    if (bucket === currentMoodBucket) return;
+    const target = MOOD_ACCENTS[bucket];
+    const start = currentMoodHex;
+    const startTime = performance.now();
+    const dur = reduceMotion ? 1 : 1400;
+    currentMoodBucket = bucket;
+    if (moodAnimId) cancelAnimationFrame(moodAnimId);
+    function step(now) {
+      const t = Math.min(1, (now - startTime) / dur);
+      const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      currentMoodHex = lerpColor(start, target, eased);
+      document.documentElement.style.setProperty('--mood', currentMoodHex);
+      if (t < 1) moodAnimId = requestAnimationFrame(step);
+      else currentMoodHex = target;
+    }
+    moodAnimId = requestAnimationFrame(step);
+  }
+  function moodBucketForAvg(a) { if (a === null) return 'calm'; if (a <= 4) return 'stormy'; if (a <= 6.5) return 'calm'; return 'thriving'; }
+  function refreshMoodFromEntries(e) { if (!e.length) { animateToMoodBucket('calm'); return; } animateToMoodBucket(moodBucketForAvg(avgOf(e.slice(-7)))); }
+
+  // ── SOUND ──
+  let audioCtx = null;
+  function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+  function playTone(f, start, dur, type, gain) { const ctx = getCtx(); const osc = ctx.createOscillator(), g = ctx.createGain(); osc.type = type; osc.frequency.value = f; g.gain.value = gain; osc.connect(g); g.connect(ctx.destination); osc.start(start); osc.stop(start + dur); }
+  function playSuccessSound() { if (!soundEnabled) return; const ctx = getCtx(); const now = ctx.currentTime; [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => playTone(f, now + i * 0.09, 0.16, 'triangle', 0.12)); }
+  function playSadSound() { if (!soundEnabled) return; const ctx = getCtx(); const now = ctx.currentTime; const osc = ctx.createOscillator(), g = ctx.createGain(); osc.type = 'sawtooth'; g.gain.value = 0.1; osc.connect(g); g.connect(ctx.destination); osc.frequency.setValueAtTime(300, now); osc.frequency.exponentialRampToValueAtTime(90, now + 0.55); osc.start(now); osc.stop(now + 0.55); }
+  function playNeutralSound() { if (!soundEnabled) return; const ctx = getCtx(); playTone(440, ctx.currentTime, 0.14, 'sine', 0.1); }
+  function playBadgeSound() { if (!soundEnabled) return; const ctx = getCtx(); const now = ctx.currentTime; [659.25, 783.99, 987.77, 1318.5].forEach((f, i) => playTone(f, now + i * 0.11, 0.2, 'triangle', 0.14)); }
+  function launchConfetti(count) { if (reduceMotion) return; const colors = ['#dbb74e', '#5c8c6e', '#b85a44', '#ede6d6']; for (let i = 0; i < count; i++) { const p = document.createElement('div'); p.className = 'confetti-piece'; p.style.left = (Math.random() * 100) + 'vw'; p.style.background = colors[Math.floor(Math.random() * colors.length)]; p.style.animationDuration = (2 + Math.random() * 1.2) + 's'; document.body.appendChild(p); setTimeout(() => p.remove(), 3800); } }
+
+  // ── PROFILE PANEL FUNCTIONS ──
   function showProfileMsg(text, isError, target) {
-    const el = target || profileMsg;
+    const el = target || $('profileMsg');
+    if (!el) return;
     el.textContent = text;
     el.className = 'profile-msg show' + (isError ? ' error' : '');
     clearTimeout(profileMsgTimeout);
@@ -975,23 +1390,31 @@
   }
 
   function renderProfilePanel() {
-    const avatarEl = profileAvatarBig;
-    if (currentProfile.pic) {
-      avatarEl.innerHTML = '<img src="' + escapeHtml(currentProfile.pic) + '" alt="profile" />';
-    } else {
-      avatarEl.textContent = '👤';
+    const avatarEl = $('profileAvatarBig');
+    if (avatarEl) {
+      if (currentProfile.pic) {
+        avatarEl.innerHTML = '<img src="' + escapeHtml(currentProfile.pic) + '" alt="profile" />';
+      } else {
+        avatarEl.textContent = '👤';
+      }
     }
-    profileDisplayNameInput.value = currentProfile.displayName || currentProfile.username;
-    profileUsernameStatic.textContent = '@' + currentProfile.username;
-    shareRatingsToggle.checked = currentProfile.shareRatings !== false;
-    shareNotesToggle.checked = currentProfile.shareNotes !== false;
+    const nameInput = $('profileDisplayNameInput');
+    if (nameInput) nameInput.value = currentProfile.displayName || currentProfile.username;
+    const staticName = $('profileUsernameStatic');
+    if (staticName) staticName.textContent = '@' + currentProfile.username;
+    const shareR = $('shareRatingsToggle');
+    if (shareR) shareR.checked = currentProfile.shareRatings !== false;
+    const shareN = $('shareNotesToggle');
+    if (shareN) shareN.checked = currentProfile.shareNotes !== false;
     renderFriendsSection();
     ensureProfilePicGrid();
   }
 
   function ensureProfilePicGrid() {
     if (profilePicGridBuilt) return;
-    buildPicGrid(profilePicGrid, currentProfile.pic || null, async function(url, el, container) {
+    const grid = $('profilePicGrid');
+    if (!grid) return;
+    buildPicGrid(grid, currentProfile.pic || null, async function(url, el, container) {
       const wasPic = currentProfile.pic;
       Array.from(container.children).forEach(child => child.classList.remove('selected'));
       el.classList.add('selected');
@@ -999,11 +1422,13 @@
         await db.collection('users').doc(currentUser.uid).update({ pic: url });
         currentProfile.pic = url;
         updateHeaderChip();
-        const avatarEl = profileAvatarBig;
-        if (url) {
-          avatarEl.innerHTML = '<img src="' + escapeHtml(url) + '" alt="profile" />';
-        } else {
-          avatarEl.textContent = '👤';
+        const avatarEl = $('profileAvatarBig');
+        if (avatarEl) {
+          if (url) {
+            avatarEl.innerHTML = '<img src="' + escapeHtml(url) + '" alt="profile" />';
+          } else {
+            avatarEl.textContent = '👤';
+          }
         }
         showProfileMsg('Profile picture updated!');
       } catch (e) {
@@ -1017,48 +1442,64 @@
     profilePicGridBuilt = true;
   }
 
-  on('profileAvatarBig', 'click', function() {
-    ensureProfilePicGrid();
-    profilePicGrid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  });
-
-  on('profileDisplayNameSaveBtn', 'click', async function() {
-    const name = profileDisplayNameInput.value.trim();
-    if (!name) return showProfileMsg("Name can't be empty.", true);
-    if (name.length > 24) return showProfileMsg('Too long.', true);
-    try {
-      await db.collection('users').doc(currentUser.uid).update({ displayName: name });
-      currentProfile.displayName = name;
-      appUsernameText.textContent = name;
-      showProfileMsg('Name updated!');
-    } catch (e) {
-      showProfileMsg('Could not save.', true);
+  function renderFriendsSection() {
+    const incomingSection = $('incomingRequestsSection');
+    if (incomingSection) incomingSection.hidden = incomingRequests.length === 0;
+    const incomingList = $('incomingRequestsList');
+    if (incomingList) {
+      incomingList.innerHTML = '';
+      incomingRequests.forEach(r => {
+        incomingList.appendChild(friendRowEl(r.profile.pic, r.profile.displayName || r.profile.username, function(a) {
+          const accept = document.createElement('button');
+          accept.type = 'button';
+          accept.className = 'btn-chip accept';
+          accept.textContent = 'Accept';
+          accept.addEventListener('click', function() { acceptFriendRequest(r.id); });
+          const decline = document.createElement('button');
+          decline.type = 'button';
+          decline.className = 'btn-chip decline';
+          decline.textContent = 'Decline';
+          decline.addEventListener('click', function() { endFriendship(r.id); });
+          a.appendChild(accept);
+          a.appendChild(decline);
+        }));
+      });
     }
-  });
-
-  shareRatingsToggle.addEventListener('change', async function() {
-    const val = shareRatingsToggle.checked;
-    try {
-      await db.collection('users').doc(currentUser.uid).update({ shareRatings: val });
-      currentProfile.shareRatings = val;
-      showProfileMsg('Saved.');
-    } catch (e) {
-      shareRatingsToggle.checked = !val;
-      showProfileMsg('Could not save.', true);
+    const outgoingSection = $('outgoingRequestsSection');
+    if (outgoingSection) outgoingSection.hidden = outgoingRequests.length === 0;
+    const outgoingList = $('outgoingRequestsList');
+    if (outgoingList) {
+      outgoingList.innerHTML = '';
+      outgoingRequests.forEach(r => {
+        outgoingList.appendChild(friendRowEl(r.profile.pic, 'Waiting for ' + (r.profile.displayName || r.profile.username), function(a) {
+          const cancel = document.createElement('button');
+          cancel.type = 'button';
+          cancel.className = 'btn-chip decline';
+          cancel.textContent = 'Cancel';
+          cancel.addEventListener('click', function() { endFriendship(r.id); });
+          a.appendChild(cancel);
+        }));
+      });
     }
-  });
-
-  shareNotesToggle.addEventListener('change', async function() {
-    const val = shareNotesToggle.checked;
-    try {
-      await db.collection('users').doc(currentUser.uid).update({ shareNotes: val });
-      currentProfile.shareNotes = val;
-      showProfileMsg('Saved.');
-    } catch (e) {
-      shareNotesToggle.checked = !val;
-      showProfileMsg('Could not save.', true);
+    const empty = $('friendsEmptyMsg');
+    if (empty) empty.hidden = friendsList.length !== 0;
+    const listEl = $('friendsListEl');
+    if (listEl) {
+      listEl.innerHTML = '';
+      friendsList.forEach(f => {
+        listEl.appendChild(friendRowEl(f.pic, f.displayName || f.username, function(a) {
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'btn-chip decline';
+          remove.textContent = 'Remove';
+          remove.addEventListener('click', function() {
+            if (confirm('Remove ' + (f.displayName || f.username) + '?')) endFriendship(f.pairId);
+          });
+          a.appendChild(remove);
+        }));
+      });
     }
-  });
+  }
 
   function friendRowEl(avatar, name, actionsBuilder) {
     const row = document.createElement('div');
@@ -1069,82 +1510,21 @@
     return row;
   }
 
-  function renderFriendsSection() {
-    incomingRequestsSection.hidden = incomingRequests.length === 0;
-    incomingRequestsList.innerHTML = '';
-    incomingRequests.forEach(r => {
-      incomingRequestsList.appendChild(friendRowEl(r.profile.pic, r.profile.displayName || r.profile.username, function(a) {
-        const accept = document.createElement('button');
-        accept.type = 'button';
-        accept.className = 'btn-chip accept';
-        accept.textContent = 'Accept';
-        accept.addEventListener('click', function() { acceptFriendRequest(r.id); });
-        const decline = document.createElement('button');
-        decline.type = 'button';
-        decline.className = 'btn-chip decline';
-        decline.textContent = 'Decline';
-        decline.addEventListener('click', function() { endFriendship(r.id); });
-        a.appendChild(accept);
-        a.appendChild(decline);
-      }));
-    });
-    outgoingRequestsSection.hidden = outgoingRequests.length === 0;
-    outgoingRequestsList.innerHTML = '';
-    outgoingRequests.forEach(r => {
-      outgoingRequestsList.appendChild(friendRowEl(r.profile.pic, 'Waiting for ' + (r.profile.displayName || r.profile.username), function(a) {
-        const cancel = document.createElement('button');
-        cancel.type = 'button';
-        cancel.className = 'btn-chip decline';
-        cancel.textContent = 'Cancel';
-        cancel.addEventListener('click', function() { endFriendship(r.id); });
-        a.appendChild(cancel);
-      }));
-    });
-    friendsEmptyMsg.hidden = friendsList.length !== 0;
-    friendsListEl.innerHTML = '';
-    friendsList.forEach(f => {
-      friendsListEl.appendChild(friendRowEl(f.pic, f.displayName || f.username, function(a) {
-        const remove = document.createElement('button');
-        remove.type = 'button';
-        remove.className = 'btn-chip decline';
-        remove.textContent = 'Remove';
-        remove.addEventListener('click', function() {
-          if (confirm('Remove ' + (f.displayName || f.username) + '?')) endFriendship(f.pairId);
-        });
-        a.appendChild(remove);
-      }));
-    });
-  }
-
-  function openProfile() {
-    profilePanel.hidden = false;
-    [ratePanel, chatPanel, statsPanel, comparePanel].forEach(p => p.hidden = true);
-    [rateTabBtn, chatTabBtn, statsTabBtn, compareTabBtn].forEach(b => b.classList.remove('active'));
-    renderProfilePanel();
-  }
-
-  function closeProfile() {
-    profilePanel.hidden = true;
-    switchTab(currentTab);
-  }
-
-  on('appUsernameChip', 'click', openProfile);
-  on('profileBackBtn', 'click', closeProfile);
-  on('compareGoToProfileBtn', 'click', openProfile);
-  on('chatGoToProfileBtn', 'click', openProfile);
-
-  // ── TABS ──
+  // ── SWITCH TAB ──
   function switchTab(name) {
     if (currentTab === 'chat' && name !== 'chat') {
       if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; activeChatPairId = null; }
       if (groupMessagesUnsub) { groupMessagesUnsub(); groupMessagesUnsub = null; activeGroupId = null; }
     }
     currentTab = name;
-    profilePanel.hidden = true;
-    const map = { rate: [ratePanel, rateTabBtn], chat: [chatPanel, chatTabBtn], stats: [statsPanel, statsTabBtn], compare: [comparePanel, compareTabBtn] };
+    const profile = $('profilePanel');
+    if (profile) profile.hidden = true;
+    const map = { rate: ['ratePanel', 'rateTabBtn'], chat: ['chatPanel', 'chatTabBtn'], stats: ['statsPanel', 'statsTabBtn'], compare: ['comparePanel', 'compareTabBtn'] };
     Object.keys(map).forEach(k => {
-      map[k][0].hidden = (k !== name);
-      map[k][1].classList.toggle('active', k === name);
+      const panel = $(map[k][0]);
+      const btn = $(map[k][1]);
+      if (panel) panel.hidden = (k !== name);
+      if (btn) btn.classList.toggle('active', k === name);
     });
     if (name === 'rate') loadRateTab();
     if (name === 'chat') loadChatTab();
@@ -1152,55 +1532,569 @@
     if (name === 'compare') loadCompareTab();
   }
 
-  on('rateTabBtn', 'click', function() { switchTab('rate'); });
-  on('chatTabBtn', 'click', function() { switchTab('chat'); });
-  on('statsTabBtn', 'click', function() { switchTab('stats'); });
-  on('compareTabBtn', 'click', function() { switchTab('compare'); });
+  // ── EVENT BINDINGS ──
+  function safeAddListener(id, event, handler) {
+    const el = $(id);
+    if (el) el.addEventListener(event, handler);
+  }
 
-  on('muteBtn', 'click', function() {
-    soundEnabled = !soundEnabled;
-    muteBtn.textContent = soundEnabled ? '🔊' : '🔇';
+  // Auth tabs
+  safeAddListener('loginTabBtn', 'click', function() {
+    const login = $('loginTabBtn'); const signup = $('signupTabBtn');
+    if (login) login.classList.add('active'); if (signup) signup.classList.remove('active');
+    const lf = $('loginForm'); if (lf) lf.hidden = false;
+    const sf = $('signupForm'); if (sf) sf.hidden = true;
+    clearAuthError();
+  });
+  safeAddListener('signupTabBtn', 'click', function() {
+    const login = $('loginTabBtn'); const signup = $('signupTabBtn');
+    if (signup) signup.classList.add('active'); if (login) login.classList.remove('active');
+    const lf = $('loginForm'); if (lf) lf.hidden = true;
+    const sf = $('signupForm'); if (sf) sf.hidden = false;
+    clearAuthError();
   });
 
-  // ── Chat type switcher ──
-  chatTypeSwitcher.addEventListener('click', function(e) {
-    const btn = e.target.closest('.chat-type-btn');
-    if (!btn) return;
-    chatTypeSwitcher.querySelectorAll('.chat-type-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    if (btn.dataset.type === 'personal') {
-      chatPersonalView.hidden = false;
-      chatGroupView.hidden = true;
-      if (friendsList.length > 0) loadChatTab();
+  // Login form
+  safeAddListener('loginForm', 'submit', async function(e) {
+    e.preventDefault();
+    clearAuthError();
+    if (!firebaseInitialized) return showAuthError('Firebase not initialized.');
+    const username = loginUsername.value.trim();
+    const password = loginPassword.value;
+    if (!username || !password) return showAuthError('Enter username and password.');
+    setAuthLoading(true);
+    try {
+      await auth.signInWithEmailAndPassword(usernameToEmail(username), password);
+    } catch (err) {
+      console.error('Login error:', err);
+      showAuthError(friendlyAuthError(err));
+    }
+    setAuthLoading(false);
+  });
+
+  // Signup form
+  safeAddListener('signupForm', 'submit', async function(e) {
+    e.preventDefault();
+    clearAuthError();
+    if (!firebaseInitialized) return showAuthError('Firebase not initialized.');
+    const username = signupUsername.value.trim();
+    const password = signupPassword.value;
+    if (!/^[a-zA-Z0-9_]{3,15}$/.test(username)) return showAuthError('Username: 3–15 letters, numbers, underscores.');
+    if (password.length < 6) return showAuthError('Password needs at least 6 characters.');
+    if (!selectedSignupPic) return showAuthError('Pick a profile picture.');
+
+    setAuthLoading(true);
+    isSigningUp = true;
+    const email = usernameToEmail(username);
+    let cred;
+    try {
+      cred = await auth.createUserWithEmailAndPassword(email, password);
+    } catch (err) {
+      isSigningUp = false;
+      setAuthLoading(false);
+      return showAuthError(friendlyAuthError(err));
+    }
+
+    try {
+      await db.collection('users').doc(cred.user.uid).set({
+        username,
+        usernameLower: username.toLowerCase(),
+        displayName: username,
+        pic: selectedSignupPic,
+        shareRatings: true,
+        shareNotes: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (pErr) {
+      await cred.user.delete().catch(() => {});
+      isSigningUp = false;
+      setAuthLoading(false);
+      return showAuthError('Profile creation failed.');
+    }
+
+    isSigningUp = false;
+    setAuthLoading(false);
+    await loadProfileAndShowApp(cred.user);
+  });
+
+  // Logout
+  safeAddListener('logoutBtn', 'click', function() {
+    resetSocialState();
+    if (auth) auth.signOut();
+  });
+  safeAddListener('profileLogoutBtn', 'click', function() {
+    resetSocialState();
+    if (auth) auth.signOut();
+  });
+
+  function resetSocialState() {
+    if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; }
+    if (friendshipsUnsub) { friendshipsUnsub(); friendshipsUnsub = null; }
+    if (groupsUnsub) { groupsUnsub(); groupsUnsub = null; }
+    if (groupMessagesUnsub) { groupMessagesUnsub(); groupMessagesUnsub = null; }
+    myEntries = []; myEntriesLoaded = false;
+    myFriendships = []; friendsList = []; incomingRequests = []; outgoingRequests = [];
+    activeChatFriendUid = null; activeChatPairId = null; chatMessagesCache = []; chatMessageLimit = 40;
+    myGroups = []; activeGroupId = null; groupMessagesCache = []; groupMessageLimit = 40;
+  }
+
+  // Tabs
+  safeAddListener('rateTabBtn', 'click', function() { switchTab('rate'); });
+  safeAddListener('chatTabBtn', 'click', function() { switchTab('chat'); });
+  safeAddListener('statsTabBtn', 'click', function() { switchTab('stats'); });
+  safeAddListener('compareTabBtn', 'click', function() { switchTab('compare'); });
+
+  // Mute
+  safeAddListener('muteBtn', 'click', function() {
+    soundEnabled = !soundEnabled;
+    const btn = $('muteBtn');
+    if (btn) btn.textContent = soundEnabled ? '🔊' : '🔇';
+  });
+
+  // Profile open/close
+  safeAddListener('appUsernameChip', 'click', function() { openProfile(); });
+  safeAddListener('profileBackBtn', 'click', function() { closeProfile(); });
+  safeAddListener('compareGoToProfileBtn', 'click', function() { openProfile(); });
+  safeAddListener('chatGoToProfileBtn', 'click', function() { openProfile(); });
+
+  function openProfile() {
+    const profile = $('profilePanel');
+    if (profile) profile.hidden = false;
+    [ratePanel, chatPanel, statsPanel, comparePanel].forEach(p => { const el = $(p.id); if (el) el.hidden = true; });
+    [rateTabBtn, chatTabBtn, statsTabBtn, compareTabBtn].forEach(b => { if (b) b.classList.remove('active'); });
+    renderProfilePanel();
+  }
+  function closeProfile() {
+    const profile = $('profilePanel');
+    if (profile) profile.hidden = true;
+    switchTab(currentTab);
+  }
+
+  // Friend add inline
+  safeAddListener('friendAddBtn', 'click', async function() {
+    const input = $('friendAddInput');
+    if (!input) return;
+    const uname = input.value.trim();
+    if (!uname) return;
+    const btn = $('friendAddBtn');
+    if (btn) btn.disabled = true;
+    const res = await sendFriendRequest(uname);
+    if (res.ok) {
+      input.value = '';
+      input.placeholder = '✓ sent!';
+      setTimeout(() => { input.placeholder = 'Add friend'; }, 2000);
     } else {
-      chatPersonalView.hidden = true;
-      chatGroupView.hidden = false;
-      loadGroupsList();
-      if (!activeGroupId) groupChatContent.hidden = true;
-      else openGroupChat(activeGroupId);
+      input.placeholder = '✗ ' + res.msg;
+      setTimeout(() => { input.placeholder = 'Add friend'; }, 3000);
+    }
+    if (btn) btn.disabled = false;
+  });
+  safeAddListener('friendAddInput', 'keydown', function(e) {
+    if (e.key === 'Enter') {
+      const btn = $('friendAddBtn');
+      if (btn) btn.click();
     }
   });
 
-  // ── RATE ── (rest of the code is unchanged and works)
-  // ... (the rest of the JavaScript is identical to the previous working version)
+  // Notification overlay
+  safeAddListener('notifBtn', 'click', function() {
+    renderNotificationList();
+    const overlay = $('notificationOverlay');
+    if (overlay) overlay.hidden = false;
+  });
+  safeAddListener('notifCloseBtn', 'click', function() {
+    const overlay = $('notificationOverlay');
+    if (overlay) overlay.hidden = true;
+  });
 
-  // ── We'll include the rest of the functions from the previous stable version ──
-  // Since the full code is long, I'll include the essential parts: rate, stats, compare, chat, group, etc.
-  // All functions are already defined above.
-  // For brevity in this response, I'll keep the rest as previously.
-
-  // ── BUILD SIGNUP PIC GRID ──
-  if (signupPicGrid) {
-    buildPicGrid(signupPicGrid, null, function(url, el, container) {
-      selectedSignupPic = url;
-      markPicSelected(container, url);
-      signupSubmitBtn.disabled = false;
+  function renderNotificationList() {
+    const list = $('notifList');
+    if (!list) return;
+    list.innerHTML = '';
+    if (incomingRequests.length === 0) {
+      list.innerHTML = '<div class="empty-state" style="padding:1rem;">No notifications.</div>';
+      return;
+    }
+    incomingRequests.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'friend-row';
+      const avatarHtml = r.profile.pic ? '<img src="' + escapeHtml(r.profile.pic) + '" style="width:32px;height:32px;border-radius:50%;" />' : '👤';
+      item.innerHTML = '<span style="font-size:1.2rem;">' + avatarHtml + '</span><span class="friend-row-name">' + escapeHtml(r.profile.displayName || r.profile.username) + ' wants to be friends</span><span class="friend-row-actions">';
+      const accept = document.createElement('button');
+      accept.className = 'btn-chip accept';
+      accept.textContent = 'Accept';
+      accept.addEventListener('click', function() { acceptFriendRequest(r.id); });
+      const decline = document.createElement('button');
+      decline.className = 'btn-chip decline';
+      decline.textContent = 'Decline';
+      decline.addEventListener('click', function() { endFriendship(r.id); });
+      item.querySelector('.friend-row-actions').appendChild(accept);
+      item.querySelector('.friend-row-actions').appendChild(decline);
+      list.appendChild(item);
     });
   }
 
-  // ── BOOT ──
-  // Already initialized above.
+  // Profile display name save
+  safeAddListener('profileDisplayNameSaveBtn', 'click', async function() {
+    const input = $('profileDisplayNameInput');
+    if (!input) return;
+    const name = input.value.trim();
+    if (!name) return showProfileMsg("Name can't be empty.", true);
+    if (name.length > 24) return showProfileMsg('Too long.', true);
+    try {
+      await db.collection('users').doc(currentUser.uid).update({ displayName: name });
+      currentProfile.displayName = name;
+      updateHeaderChip();
+      showProfileMsg('Name updated!');
+    } catch (e) {
+      showProfileMsg('Could not save.', true);
+    }
+  });
 
+  // Privacy toggles
+  safeAddListener('shareRatingsToggle', 'change', async function() {
+    const toggle = $('shareRatingsToggle');
+    if (!toggle) return;
+    const val = toggle.checked;
+    try {
+      await db.collection('users').doc(currentUser.uid).update({ shareRatings: val });
+      currentProfile.shareRatings = val;
+      showProfileMsg('Saved.');
+    } catch (e) {
+      toggle.checked = !val;
+      showProfileMsg('Could not save.', true);
+    }
+  });
+  safeAddListener('shareNotesToggle', 'change', async function() {
+    const toggle = $('shareNotesToggle');
+    if (!toggle) return;
+    const val = toggle.checked;
+    try {
+      await db.collection('users').doc(currentUser.uid).update({ shareNotes: val });
+      currentProfile.shareNotes = val;
+      showProfileMsg('Saved.');
+    } catch (e) {
+      toggle.checked = !val;
+      showProfileMsg('Could not save.', true);
+    }
+  });
+
+  // Profile avatar big
+  safeAddListener('profileAvatarBig', 'click', function() {
+    ensureProfilePicGrid();
+    const grid = $('profilePicGrid');
+    if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  // Rating buttons (dynamically created)
+  const ratingRow = $('ratingRow');
+  if (ratingRow) {
+    for (let i = 1; i <= 10; i++) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'rating-btn';
+      btn.dataset.value = String(i);
+      btn.textContent = String(i);
+      btn.addEventListener('click', function() { selectRating(i); });
+      ratingRow.appendChild(btn);
+    }
+  }
+
+  // Submit rating
+  safeAddListener('submitBtn', 'click', async function() {
+    if (!selectedRating) return;
+    const submit = $('submitBtn');
+    if (submit) submit.disabled = true;
+    const today = todayStr();
+    const docId = currentUser.uid + '_' + today;
+    const isPrivate = privacyCheckbox ? privacyCheckbox.checked : false;
+    const payload = {
+      uid: currentUser.uid,
+      username: currentProfile.username,
+      date: today,
+      rating: selectedRating,
+      note: noteInput ? noteInput.value.trim().slice(0, 280) : '',
+      private: isPrivate,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if (!todayDocExists) {
+      payload.ratedAtHour = new Date().getHours();
+      payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+    }
+    try {
+      await db.collection('ratings').doc(docId).set(payload, { merge: true });
+      todayDocExists = true;
+      celebrateRating(selectedRating);
+      if (submit) submit.textContent = "Update today's shittiness";
+      const already = $('alreadyRatedNote');
+      if (already) already.hidden = false;
+      await fetchMyEntries(true);
+      refreshMoodFromEntries(myEntries);
+    } catch (err) {
+      alert('Could not save rating.');
+    }
+    if (submit) submit.disabled = false;
+  });
+
+  function celebrateRating(n) {
+    const bucket = bucketFor(n);
+    const caps = REACTION_CAPTIONS[bucket];
+    const reaction = $('reactionCard');
+    if (reaction) {
+      reaction.textContent = caps[Math.floor(Math.random() * caps.length)];
+      reaction.className = 'reaction-card show ' + bucket;
+      clearTimeout(reactionTimeout);
+      reactionTimeout = setTimeout(() => reaction.classList.remove('show'), 3400);
+    }
+    const stamp = $('stampMark');
+    if (stamp) {
+      stamp.textContent = 'GRADE ' + LETTER_GRADE[n];
+      stamp.classList.remove('show');
+      void stamp.offsetWidth;
+      stamp.classList.add('show');
+    }
+    if (bucket === 'rough') { playSadSound(); } else if (bucket === 'meh') { playNeutralSound(); } else if (bucket === 'good') { playSuccessSound(); } else { playSuccessSound(); launchConfetti(30); }
+  }
+
+  // Chat send
+  safeAddListener('chatSendBtn', 'click', sendChatMessage);
+  safeAddListener('chatTextInput', 'keydown', function(e) { if (e.key === 'Enter') sendChatMessage(); });
+
+  async function sendChatMessage() {
+    const input = $('chatTextInput');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    const btn = $('chatSendBtn');
+    if (btn) btn.disabled = true;
+    try {
+      await db.collection('chats').doc(activeChatPairId).collection('messages').add({
+        authorId: currentUser.uid,
+        authorName: currentProfile.displayName || currentProfile.username,
+        text: text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        reactions: {}
+      });
+    } catch (e) {}
+    if (btn) btn.disabled = false;
+  }
+
+  // Chat share day
+  safeAddListener('chatShareDayBtn', 'click', function() { if (friendsList.length === 0) return; openDayShareOverlay(); });
+
+  async function openDayShareOverlay() {
+    const list = $('dayShareList');
+    if (!list) return;
+    list.innerHTML = '<div class="loading-state small">Loading your days…</div>';
+    const overlay = $('dayShareOverlay');
+    if (overlay) overlay.hidden = false;
+    await fetchMyEntries(true);
+    const entries = myEntries.slice().reverse();
+    if (!entries.length) {
+      list.innerHTML = '<div class="empty-state" style="padding:1rem;">No rated days yet.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    entries.forEach(e => {
+      const item = document.createElement('div');
+      item.className = 'day-share-item';
+      item.innerHTML = '<span class="emoji">' + EMOJI_BY_RATING[e.rating] + '</span><span class="info"><span class="date">' + formatDate(e.date) + '</span><span class="rating"> ' + e.rating + '/10</span></span>';
+      item.addEventListener('click', async function() {
+        if (overlay) overlay.hidden = true;
+        try {
+          await db.collection('chats').doc(activeChatPairId).collection('messages').add({
+            authorId: currentUser.uid,
+            authorName: currentProfile.displayName || currentProfile.username,
+            text: '',
+            type: 'day_share',
+            data: { date: e.date, rating: e.rating, note: e.note || '' },
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            reactions: {}
+          });
+        } catch (e) {}
+      });
+      list.appendChild(item);
+    });
+  }
+
+  safeAddListener('dayShareCloseBtn', 'click', function() {
+    const overlay = $('dayShareOverlay');
+    if (overlay) overlay.hidden = true;
+  });
+
+  // Chat load earlier
+  safeAddListener('chatLoadEarlierBtn', 'click', function() {
+    chatMessageLimit += 30;
+    if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; }
+    const pairId = activeChatPairId;
+    chatMessagesUnsub = db.collection('chats').doc(pairId).collection('messages').orderBy('timestamp', 'desc').limit(chatMessageLimit).onSnapshot(function(snap) {
+      const msgs = snap.docs.map(d => Object.assign({ id: d.id }, d.data())).reverse();
+      chatMessagesCache = msgs;
+      renderChatMessages(msgs);
+      const wrap = $('chatLoadEarlierWrap');
+      if (wrap) wrap.hidden = !(msgs.length >= chatMessageLimit);
+    }, function() {});
+  });
+
+  // Group send
+  safeAddListener('groupChatSendBtn', 'click', sendGroupMessage);
+  safeAddListener('groupChatTextInput', 'keydown', function(e) { if (e.key === 'Enter') sendGroupMessage(); });
+
+  async function sendGroupMessage() {
+    const input = $('groupChatTextInput');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    const btn = $('groupChatSendBtn');
+    if (btn) btn.disabled = true;
+    try {
+      await db.collection('groups').doc(activeGroupId).collection('messages').add({
+        authorId: currentUser.uid,
+        authorName: currentProfile.displayName || currentProfile.username,
+        text: text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        reactions: {}
+      });
+    } catch (e) {}
+    if (btn) btn.disabled = false;
+  }
+
+  safeAddListener('groupChatLoadEarlierBtn', 'click', function() {
+    groupMessageLimit += 30;
+    if (groupMessagesUnsub) { groupMessagesUnsub(); groupMessagesUnsub = null; }
+    const gid = activeGroupId;
+    groupMessagesUnsub = db.collection('groups').doc(gid).collection('messages').orderBy('timestamp', 'desc').limit(groupMessageLimit).onSnapshot(function(snap) {
+      const msgs = snap.docs.map(d => Object.assign({ id: d.id }, d.data())).reverse();
+      groupMessagesCache = msgs;
+      renderGroupMessages(msgs);
+      const wrap = $('groupChatLoadEarlierWrap');
+      if (wrap) wrap.hidden = !(msgs.length >= groupMessageLimit);
+    }, function() {});
+  });
+
+  // Create group
+  safeAddListener('createGroupBtn', 'click', function() {
+    const overlay = $('createGroupOverlay');
+    if (overlay) overlay.hidden = false;
+    const nameInput = $('groupNameInput');
+    if (nameInput) nameInput.value = '';
+    const picker = $('groupMemberPicker');
+    if (picker) {
+      picker.innerHTML = '';
+      friendsList.forEach(f => {
+        const label = document.createElement('label');
+        label.style.display = 'flex';
+        label.style.alignItems = 'center';
+        label.style.gap = '6px';
+        label.style.padding = '4px 0';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = f.uid;
+        cb.checked = true;
+        label.appendChild(cb);
+        const avatarHtml = f.pic ? '<img src="' + escapeHtml(f.pic) + '" style="width:24px;height:24px;border-radius:50%;" />' : '👤';
+        label.innerHTML += avatarHtml + ' ' + escapeHtml(f.displayName || f.username);
+        picker.appendChild(label);
+      });
+      const confirmBtn = $('createGroupConfirmBtn');
+      if (confirmBtn) confirmBtn.disabled = friendsList.length === 0;
+    }
+  });
+
+  safeAddListener('createGroupCloseBtn', 'click', function() {
+    const overlay = $('createGroupOverlay');
+    if (overlay) overlay.hidden = true;
+  });
+
+  safeAddListener('createGroupConfirmBtn', 'click', async function() {
+    const nameInput = $('groupNameInput');
+    const name = nameInput ? nameInput.value.trim() : 'Unnamed group';
+    const picker = $('groupMemberPicker');
+    if (!picker) return;
+    const checkboxes = picker.querySelectorAll('input[type="checkbox"]:checked');
+    const memberUids = Array.from(checkboxes).map(cb => cb.value);
+    if (!memberUids.includes(currentUser.uid)) memberUids.push(currentUser.uid);
+    if (memberUids.length < 2) {
+      const msg = $('createGroupMsg');
+      if (msg) { msg.textContent = 'Need at least 2 members (including you).'; msg.className = 'profile-msg show error'; }
+      return;
+    }
+    try {
+      const groupRef = await db.collection('groups').add({
+        name: name,
+        members: memberUids,
+        createdBy: currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      const overlay = $('createGroupOverlay');
+      if (overlay) overlay.hidden = true;
+      // switch to group view
+      const groupBtn = document.querySelector('.chat-type-btn[data-type="group"]');
+      if (groupBtn) groupBtn.click();
+      loadGroupsList();
+      activeGroupId = groupRef.id;
+      openGroupChat(groupRef.id);
+    } catch (e) {
+      const msg = $('createGroupMsg');
+      if (msg) { msg.textContent = 'Failed to create group.'; msg.className = 'profile-msg show error'; }
+    }
+  });
+
+  // Chat type switcher
+  const switcher = $('chatTypeSwitcher');
+  if (switcher) {
+    switcher.addEventListener('click', function(e) {
+      const btn = e.target.closest('.chat-type-btn');
+      if (!btn) return;
+      switcher.querySelectorAll('.chat-type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (btn.dataset.type === 'personal') {
+        const pv = $('chatPersonalView');
+        const gv = $('chatGroupView');
+        if (pv) pv.hidden = false;
+        if (gv) gv.hidden = true;
+        if (friendsList.length > 0) loadChatTab();
+      } else {
+        const pv = $('chatPersonalView');
+        const gv = $('chatGroupView');
+        if (pv) pv.hidden = true;
+        if (gv) gv.hidden = false;
+        loadGroupsList();
+        if (!activeGroupId) {
+          const gc = $('groupChatContent');
+          if (gc) gc.hidden = true;
+        } else {
+          openGroupChat(activeGroupId);
+        }
+      }
+    });
+  }
+
+  // Build signup pic grid
+  const signupGrid = $('signupPicGrid');
+  if (signupGrid) {
+    buildPicGrid(signupGrid, null, function(url, el, container) {
+      selectedSignupPic = url;
+      markPicSelected(container, url);
+      const submit = $('signupSubmitBtn');
+      if (submit) submit.disabled = false;
+    });
+  }
+
+  // ── QUICK REACTIONS ──
+  document.querySelectorAll('.quick-reactions button').forEach(b => {
+    b.addEventListener('click', function() {
+      const input = chatTextInput;
+      if (input) {
+        input.value += this.dataset.emoji + ' ';
+        input.focus();
+      }
+    });
+  });
+
+  console.log('App loaded successfully');
 })();
 </script>
 </body>
