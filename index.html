@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Shitty Human — redesigned with friends, real‑time chat, day sharing, privacy controls, and profile pictures.
-  No user limit – supports up to 1000 accounts.
+  Shitty Human — redesigned with profile pictures, friend requests, notifications, and group chats.
 -->
 <html lang="en">
 <head>
@@ -93,11 +92,11 @@
     .app-bar { display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.8rem; border-bottom: 1px solid #2a3322; margin-bottom: 1rem; }
     .app-wordmark { display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; font-weight: 600; }
     .app-bar-right { display: flex; align-items: center; gap: 0.5rem; }
-    .player-chip { display: flex; align-items: center; gap: 0.4rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: #b7af9c; background: #2a3322; padding: 0.2rem 0.6rem 0.2rem 0.3rem; border-radius: 30px; cursor: pointer; border: 1px solid transparent; }
+    .player-chip { display: flex; align-items: center; gap: 0.4rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: #b7af9c; background: #2a3322; padding: 0.2rem 0.6rem 0.2rem 0.3rem; border-radius: 30px; cursor: pointer; border: 1px solid transparent; position: relative; }
     .player-chip:hover { border-color: #dbb74e; }
     .icon-btn { background: transparent; border: 1px solid #3a4a30; color: #ede6d6; width: 32px; height: 32px; border-radius: 50%; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
     .icon-btn:hover { border-color: #dbb74e; color: #dbb74e; }
-    .friend-req-dot { background: #dbb74e; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-left: 4px; }
+    .friend-req-dot { background: #dbb74e; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-left: 4px; position: absolute; top: -2px; right: -2px; }
 
     /* ── tabs ── */
     .tab-bar { display: flex; gap: 4px; background: #1a2216; padding: 4px; border-radius: 14px; margin-bottom: 1.2rem; border: 1px solid #2a3322; }
@@ -108,7 +107,7 @@
     @keyframes rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     [hidden] { display: none !important; }
 
-    /* ── avatar badge (now supports images) ── */
+    /* ── avatar badge (now always shows profile pic or default) ── */
     .avatar-badge {
       border-radius: 50%;
       display: flex;
@@ -118,16 +117,30 @@
       border: 1px solid #3a4a30;
       flex-shrink: 0;
       overflow: hidden;
+      font-size: 0.7rem;
+      color: #b7af9c;
+      font-weight: 600;
     }
     .avatar-badge img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    .avatar-badge.xs { width: 24px; height: 24px; font-size: 12px; }
-    .avatar-badge.sm { width: 32px; height: 32px; font-size: 16px; }
-    .avatar-badge.md { width: 44px; height: 44px; font-size: 22px; }
-    .avatar-badge.lg { width: 68px; height: 68px; font-size: 30px; border-width: 2px; border-color: #dbb74e; box-shadow: 0 0 0 3px rgba(219,183,78,0.15); }
+    .avatar-badge .default-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background: #2a3322;
+      color: #b7af9c;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .avatar-badge.xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-badge.sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-badge.md { width: 44px; height: 44px; font-size: 14px; }
+    .avatar-badge.lg { width: 68px; height: 68px; font-size: 18px; border-width: 2px; border-color: #dbb74e; box-shadow: 0 0 0 3px rgba(219,183,78,0.15); }
 
     /* ── profile picture picker ── */
     .profile-pic-grid {
@@ -179,6 +192,8 @@
       cursor: pointer;
       transition: 0.2s;
       overflow: hidden;
+      color: #b7af9c;
+      font-weight: 600;
     }
     .profile-avatar-big img {
       width: 100%;
@@ -253,13 +268,23 @@
     .chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
     /* ── chat ── */
+    .chat-type-switcher { display: flex; gap: 6px; margin-bottom: 0.8rem; }
+    .chat-type-btn { flex:1; border:1px solid #3a4a30; background:transparent; color:#b7af9c; padding:0.3rem 0; border-radius:20px; font-weight:600; font-size:0.75rem; transition:0.15s; }
+    .chat-type-btn.active { background:#dbb74e; color:#1e261a; border-color:#dbb74e; }
+
     .friend-switcher { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 0.8rem; }
     .friend-pill { display: flex; align-items: center; gap: 4px; padding: 0.3rem 0.8rem; border-radius: 30px; border: 1px solid #3a4a30; background: transparent; color: #b7af9c; font-size: 0.8rem; font-weight: 500; transition: 0.15s; }
     .friend-pill.active { border-color: #dbb74e; color: #ede6d6; background: rgba(219,183,78,0.06); }
     .friend-pill:hover { border-color: #b7af9c; }
+
+    .group-list-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 0.6rem; border-radius: 30px; border:1px solid #3a4a30; background:transparent; color:#b7af9c; font-size:0.8rem; font-weight:500; cursor:pointer; transition:0.15s; margin-bottom:4px; }
+    .group-list-item.active { border-color:#dbb74e; color:#ede6d6; background:rgba(219,183,78,0.06); }
+    .group-list-item:hover { border-color:#b7af9c; }
+
     .chat-header { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0.6rem; background: #1a2216; border-radius: 12px; border: 1px solid #2a3322; margin-bottom: 0.8rem; }
     .chat-header .name { font-weight: 600; font-size: 0.9rem; }
     .chat-header .sub { font-size: 0.7rem; color: #9e9480; }
+
     .chat-messages { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
     .chat-message { max-width: 80%; padding: 0.5rem 0.8rem; border-radius: 14px; font-size: 0.85rem; word-wrap: break-word; }
     .chat-message.mine { align-self: flex-end; background: #dbb74e; color: #1e261a; border-bottom-right-radius: 4px; }
@@ -268,6 +293,7 @@
     .chat-message .reactions { display: flex; gap: 2px; margin-top: 2px; flex-wrap: wrap; }
     .chat-message .reactions button { background: transparent; border: none; font-size: 0.8rem; padding: 0 2px; }
     .chat-message .reactions span { font-size: 0.7rem; color: #7a6f5a; margin-left: 2px; }
+
     .chat-composer { display: flex; gap: 6px; margin-top: 0.6rem; align-items: center; }
     .chat-composer input { flex:1; background: #2a3322; border: 1px solid #3a4a30; color: #ede6d6; padding: 0.5rem 0.8rem; border-radius: 30px; font-size: 0.85rem; }
     .chat-composer input:focus { border-color: #dbb74e; outline: none; }
@@ -290,6 +316,7 @@
     .profile-msg { font-size: 0.8rem; padding: 0.3rem 0.6rem; border-radius: 8px; display: none; }
     .profile-msg.show { display: block; }
     .profile-msg.error { background: rgba(200,80,60,0.12); color: #e8b8a8; border: 1px solid #b85a44; }
+
     .switch-row { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid #1a2216; gap: 0.8rem; }
     .switch-row .switch-text { font-size: 0.8rem; }
     .switch-row .switch-text strong { display: block; font-size: 0.85rem; }
@@ -300,13 +327,16 @@
     .switch .thumb { position: absolute; top:2px; left:2px; width:18px; height:18px; background:#ede6d6; border-radius:50%; transition:0.2s; }
     .switch input:checked + .track { background: #dbb74e; }
     .switch input:checked + .track + .thumb { transform: translateX(18px); background:#1e261a; }
+
     .add-friend-row { display: flex; gap: 6px; margin-bottom: 0.4rem; }
     .add-friend-row input { flex:1; background: #2a3322; border: 1px solid #3a4a30; color: #ede6d6; padding: 0.4rem 0.8rem; border-radius: 10px; font-size: 0.85rem; }
     .add-friend-row input:focus { border-color: #dbb74e; outline: none; }
+
     .section-label { font-size: 0.7rem; font-weight: 600; color: #b7af9c; text-transform: uppercase; letter-spacing: 0.04em; margin: 0.8rem 0 0.3rem; }
     .friend-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 0; border-bottom: 1px solid #1a2216; }
     .friend-row .friend-row-name { flex:1; font-size: 0.85rem; }
     .friend-row .friend-row-actions { display: flex; gap: 4px; }
+
     .btn-chip { border: none; padding: 0.1rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; transition:0.15s; }
     .btn-chip.accept { background: #5c8c6e; color: #ede6d6; }
     .btn-chip.accept:hover { filter: brightness(1.1); }
@@ -374,7 +404,7 @@
       <form id="signupForm" hidden>
         <div class="field"><label>Username</label><input id="signupUsername" type="text" /><div class="field-hint">3–15 letters, numbers, underscores</div></div>
         <div class="field"><label>Password</label><input id="signupPassword" type="password" /><div class="field-hint">At least 6 characters</div></div>
-        <div class="field"><label>Pick an avatar</label><div class="avatar-grid" id="signupAvatarGrid"></div></div>
+        <div class="field"><label>Choose a profile picture</label><div class="profile-pic-grid" id="signupPicGrid"></div></div>
         <button type="submit" class="btn-primary" id="signupSubmitBtn" disabled>Create Account</button>
         <div class="field-hint" style="text-align:center; margin-top:12px;">Open to the first 1000 users</div>
       </form>
@@ -388,10 +418,11 @@
       <div class="app-wordmark">💩 <span>Shitty Human</span></div>
       <div class="app-bar-right">
         <span class="player-chip" id="appUsernameChip">
-          <span class="avatar-badge xs" id="appAvatarBadge">💩</span>
+          <span class="avatar-badge xs" id="appAvatarBadge">👤</span>
           <span id="appUsernameText">—</span>
           <span class="friend-req-dot" id="friendReqDot" hidden></span>
         </span>
+        <button class="icon-btn" id="notifBtn">🔔</button>
         <button class="icon-btn" id="muteBtn">🔊</button>
         <button class="icon-btn" id="logoutBtn">⏻</button>
       </div>
@@ -424,33 +455,65 @@
 
     <!-- ── CHAT PANEL ── -->
     <section id="chatPanel" class="panel" hidden>
-      <div class="friend-switcher" id="chatFriendSwitcher" hidden></div>
-      <div class="loading-state" id="chatLoading">Loading chat…</div>
-      <div class="empty-state" id="chatEmptyState" hidden>
-        <span class="emoji">👋</span>
-        Add a friend to start chatting.<br />
-        <button class="btn-ghost" style="margin-top:8px;" id="chatGoToProfileBtn">Go to profile</button>
+      <div class="chat-type-switcher">
+        <button class="chat-type-btn active" data-type="personal">Personal</button>
+        <button class="chat-type-btn" data-type="group">Groups</button>
       </div>
-      <div id="chatContent" hidden>
-        <div class="chat-header">
-          <span class="avatar-badge sm" id="chatHeaderAvatar">💩</span>
-          <div><div class="name" id="chatHeaderName">—</div><div class="sub" id="chatHeaderSub">offline</div></div>
+      <div id="chatPersonalView">
+        <div class="friend-switcher" id="chatFriendSwitcher" hidden></div>
+        <div class="loading-state" id="chatLoading">Loading chat…</div>
+        <div class="empty-state" id="chatEmptyState" hidden>
+          <span class="emoji">👋</span>
+          Add a friend to start chatting.<br />
+          <button class="btn-ghost" style="margin-top:8px;" id="chatGoToProfileBtn">Go to profile</button>
         </div>
-        <div class="chat-messages" id="chatMessagesList"></div>
-        <div class="chat-composer">
-          <input type="text" id="chatTextInput" placeholder="Say something…" maxlength="280" />
-          <button class="btn-ghost" id="chatShareDayBtn" title="Share a rated day">📅</button>
-          <div class="quick-reactions">
-            <button data-emoji="❤️">❤️</button>
-            <button data-emoji="😂">😂</button>
-            <button data-emoji="😮">😮</button>
-            <button data-emoji="😢">😢</button>
-            <button data-emoji="👍">👍</button>
-            <button data-emoji="🔥">🔥</button>
+        <div id="chatContent" hidden>
+          <div class="chat-header">
+            <span class="avatar-badge sm" id="chatHeaderAvatar">👤</span>
+            <div><div class="name" id="chatHeaderName">—</div><div class="sub" id="chatHeaderSub">offline</div></div>
           </div>
-          <button class="btn-ghost" id="chatSendBtn">Send</button>
+          <div class="chat-messages" id="chatMessagesList"></div>
+          <div class="chat-composer">
+            <input type="text" id="chatTextInput" placeholder="Say something…" maxlength="280" />
+            <button class="btn-ghost" id="chatShareDayBtn" title="Share a rated day">📅</button>
+            <div class="quick-reactions">
+              <button data-emoji="❤️">❤️</button>
+              <button data-emoji="😂">😂</button>
+              <button data-emoji="😮">😮</button>
+              <button data-emoji="😢">😢</button>
+              <button data-emoji="👍">👍</button>
+              <button data-emoji="🔥">🔥</button>
+            </div>
+            <button class="btn-ghost" id="chatSendBtn">Send</button>
+          </div>
+          <div id="chatLoadEarlierWrap" hidden><button class="btn-ghost" id="chatLoadEarlierBtn" style="width:100%;margin-top:4px;">Load earlier</button></div>
         </div>
-        <div id="chatLoadEarlierWrap" hidden><button class="btn-ghost" id="chatLoadEarlierBtn" style="width:100%;margin-top:4px;">Load earlier</button></div>
+      </div>
+      <div id="chatGroupView" hidden>
+        <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
+          <button class="btn-ghost" id="createGroupBtn">➕ New Group</button>
+        </div>
+        <div id="groupList"></div>
+        <div id="groupChatContent" hidden>
+          <div class="chat-header">
+            <span class="avatar-badge sm" id="groupChatAvatar">👥</span>
+            <div><div class="name" id="groupChatName">—</div><div class="sub" id="groupChatSub">group</div></div>
+          </div>
+          <div class="chat-messages" id="groupMessagesList"></div>
+          <div class="chat-composer">
+            <input type="text" id="groupChatTextInput" placeholder="Say something…" maxlength="280" />
+            <div class="quick-reactions">
+              <button data-emoji="❤️">❤️</button>
+              <button data-emoji="😂">😂</button>
+              <button data-emoji="😮">😮</button>
+              <button data-emoji="😢">😢</button>
+              <button data-emoji="👍">👍</button>
+              <button data-emoji="🔥">🔥</button>
+            </div>
+            <button class="btn-ghost" id="groupChatSendBtn">Send</button>
+          </div>
+          <div id="groupChatLoadEarlierWrap" hidden><button class="btn-ghost" id="groupChatLoadEarlierBtn" style="width:100%;margin-top:4px;">Load earlier</button></div>
+        </div>
       </div>
     </section>
 
@@ -490,9 +553,9 @@
       <div id="compareContent" hidden>
         <div class="card">
           <div class="vs-header">
-            <div class="player-badge"><span class="avatar-badge lg" id="badgeAAvatar">?</span><div class="badge-name" id="badgeAName">—</div><div class="badge-stat" id="badgeAStat">—</div></div>
+            <div class="player-badge"><span class="avatar-badge lg" id="badgeAAvatar">👤</span><div class="badge-name" id="badgeAName">—</div><div class="badge-stat" id="badgeAStat">—</div></div>
             <div class="vs-divider">VS</div>
-            <div class="player-badge"><span class="avatar-badge lg" id="badgeBAvatar">?</span><div class="badge-name" id="badgeBName">—</div><div class="badge-stat" id="badgeBStat">—</div></div>
+            <div class="player-badge"><span class="avatar-badge lg" id="badgeBAvatar">👤</span><div class="badge-name" id="badgeBName">—</div><div class="badge-stat" id="badgeBStat">—</div></div>
           </div>
           <div class="streak-banner" id="streakBanner">—</div>
           <div class="verdict-banner" id="compareVerdict">—</div>
@@ -508,7 +571,7 @@
       <div class="profile-topbar"><button class="btn-ghost" id="profileBackBtn">← Back</button></div>
       <div class="card">
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-          <button class="profile-avatar-big" id="profileAvatarBig">💩</button>
+          <button class="profile-avatar-big" id="profileAvatarBig">👤</button>
           <div class="profile-avatar-hint">Tap to change</div>
           <div class="profile-pic-grid-container">
             <div class="profile-pic-grid" id="profilePicGrid"></div>
@@ -546,10 +609,30 @@
     </div>
   </div>
 
+  <!-- ── CREATE GROUP OVERLAY ── -->
+  <div id="createGroupOverlay" class="overlay-shell" hidden>
+    <div class="overlay-card">
+      <div class="overlay-card-head"><h2>Create a group</h2><button class="overlay-close-btn" id="createGroupCloseBtn">✕</button></div>
+      <div class="field"><label>Group name</label><input id="groupNameInput" maxlength="30" /></div>
+      <div class="section-label">Select members (friends)</div>
+      <div id="groupMemberPicker"></div>
+      <button class="btn-primary" id="createGroupConfirmBtn" style="margin-top:10px;">Create</button>
+      <div id="createGroupMsg" class="profile-msg" style="margin-top:6px;"></div>
+    </div>
+  </div>
+
+  <!-- ── NOTIFICATION OVERLAY ── -->
+  <div id="notificationOverlay" class="overlay-shell" hidden>
+    <div class="overlay-card">
+      <div class="overlay-card-head"><h2>Notifications</h2><button class="overlay-close-btn" id="notifCloseBtn">✕</button></div>
+      <div id="notifList"></div>
+    </div>
+  </div>
+
   <!-- ── BADGE TOASTS ── -->
   <div class="badge-toast-layer" id="badgeToastLayer"></div>
 
-  <footer>Made with 💩 — just for you and your friends</footer>
+  <footer>made for shitty human</footer>
 </div>
 
 <!-- ── SCRIPTS ── -->
@@ -587,7 +670,6 @@
     good: { label: 'Good (7-8)', color: '#5c8c6e' },
     amazing: { label: 'Amazing (9-10)', color: '#dbb74e' }
   };
-  const AVATAR_EMOJIS = ['🐱','🐶','🦊','🐼','🐧','🦄','🐉','🍕','🌸','🎀','💖','🌈','🦋','🌺','🍩','🎮'];
   const WEEKDAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const QUICK_REACTIONS = ['❤️','😂','😮','😢','👍','🔥'];
   const MOOD_ACCENTS = { stormy: '#b85a44', calm: '#8f7f55', thriving: '#dbb74e' };
@@ -602,6 +684,9 @@
     { name: 'Søren Kierkegaard', url: 'https://raw.githubusercontent.com/Jishnuec/shitty-human/master/Profile/S%C3%B8ren%20Kierkegaard.jpg' }
   ];
 
+  // Default avatar (silhouette)
+  const DEFAULT_AVATAR = '👤';
+
   function bucketFor(n) { if (n<=3) return 'rough'; if (n<=6) return 'meh'; if (n<=8) return 'good'; return 'amazing'; }
   function seriesColor(idx) { return idx === 0 ? '#dbb74e' : '#5c8c6e'; }
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -613,19 +698,31 @@
   const loginForm = $('loginForm'), signupForm = $('signupForm');
   const loginUsername = $('loginUsername'), loginPassword = $('loginPassword');
   const signupUsername = $('signupUsername'), signupPassword = $('signupPassword');
-  const signupAvatarGrid = $('signupAvatarGrid'), signupSubmitBtn = $('signupSubmitBtn');
+  const signupPicGrid = $('signupPicGrid'), signupSubmitBtn = $('signupSubmitBtn');
   const authError = $('authError'), authLoadingText = $('authLoadingText');
   const appUsernameChip = $('appUsernameChip'), appAvatarBadge = $('appAvatarBadge'), appUsernameText = $('appUsernameText'), friendReqDot = $('friendReqDot');
-  const muteBtn = $('muteBtn'), logoutBtn = $('logoutBtn');
+  const notifBtn = $('notifBtn'), muteBtn = $('muteBtn'), logoutBtn = $('logoutBtn');
   const rateTabBtn = $('rateTabBtn'), chatTabBtn = $('chatTabBtn'), statsTabBtn = $('statsTabBtn'), compareTabBtn = $('compareTabBtn');
   const ratePanel = $('ratePanel'), chatPanel = $('chatPanel'), statsPanel = $('statsPanel'), comparePanel = $('comparePanel'), profilePanel = $('profilePanel');
   const rateDateLabel = $('rateDateLabel'), bigEmoji = $('bigEmoji'), bigEmojiLabel = $('bigEmojiLabel'), stampMark = $('stampMark');
   const ratingRow = $('ratingRow'), noteInput = $('noteInput'), privacyCheckbox = $('privacyCheckbox'), submitBtn = $('submitBtn');
   const alreadyRatedNote = $('alreadyRatedNote'), reactionCard = $('reactionCard');
+
+  // Chat
+  const chatTypeSwitcher = $('chatTypeSwitcher'), chatPersonalView = $('chatPersonalView'), chatGroupView = $('chatGroupView');
   const chatFriendSwitcher = $('chatFriendSwitcher'), chatLoading = $('chatLoading'), chatEmptyState = $('chatEmptyState'), chatContent = $('chatContent');
   const chatHeaderAvatar = $('chatHeaderAvatar'), chatHeaderName = $('chatHeaderName'), chatHeaderSub = $('chatHeaderSub');
   const chatMessagesList = $('chatMessagesList'), chatTextInput = $('chatTextInput'), chatSendBtn = $('chatSendBtn'), chatShareDayBtn = $('chatShareDayBtn');
   const chatLoadEarlierWrap = $('chatLoadEarlierWrap'), chatLoadEarlierBtn = $('chatLoadEarlierBtn');
+
+  // Group chat
+  const groupList = $('groupList'), groupChatContent = $('groupChatContent'), groupChatAvatar = $('groupChatAvatar'), groupChatName = $('groupChatName'), groupChatSub = $('groupChatSub');
+  const groupMessagesList = $('groupMessagesList'), groupChatTextInput = $('groupChatTextInput'), groupChatSendBtn = $('groupChatSendBtn');
+  const groupChatLoadEarlierWrap = $('groupChatLoadEarlierWrap'), groupChatLoadEarlierBtn = $('groupChatLoadEarlierBtn');
+  const createGroupBtn = $('createGroupBtn'), createGroupOverlay = $('createGroupOverlay'), createGroupCloseBtn = $('createGroupCloseBtn');
+  const groupNameInput = $('groupNameInput'), groupMemberPicker = $('groupMemberPicker'), createGroupConfirmBtn = $('createGroupConfirmBtn'), createGroupMsg = $('createGroupMsg');
+
+  // Stats
   const statsLoading = $('statsLoading'), statsEmpty = $('statsEmpty'), statsContent = $('statsContent');
   const statAvg = $('statAvg'), statStreak = $('statStreak'), statLongestStreak = $('statLongestStreak'), statCount = $('statCount');
   const statBest = $('statBest'), statWorst = $('statWorst');
@@ -633,12 +730,16 @@
   const heatmapGrid = $('heatmapGrid'), badgesGrid = $('badgesGrid');
   const statsLineCanvas = $('statsLineCanvas'), statsDoughnutCanvas = $('statsDoughnutCanvas');
   const historyList = $('historyList');
+
+  // Compare
   const compareFriendSwitcher = $('compareFriendSwitcher'), compareLoading = $('compareLoading'), compareWaiting = $('compareWaiting'), compareContent = $('compareContent');
   const badgeAAvatar = $('badgeAAvatar'), badgeAName = $('badgeAName'), badgeAStat = $('badgeAStat');
   const badgeBAvatar = $('badgeBAvatar'), badgeBName = $('badgeBName'), badgeBStat = $('badgeBStat');
   const streakBanner = $('streakBanner'), compareVerdict = $('compareVerdict');
   const compareLineCanvas = $('compareLineCanvas'), compareBarCanvas = $('compareBarCanvas');
   const compareDoughnutACanvas = $('compareDoughnutACanvas'), compareDoughnutBCanvas = $('compareDoughnutBCanvas');
+
+  // Profile
   const profileBackBtn = $('profileBackBtn'), profileAvatarBig = $('profileAvatarBig'), profilePicGrid = $('profilePicGrid');
   const profileDisplayNameInput = $('profileDisplayNameInput'), profileDisplayNameSaveBtn = $('profileDisplayNameSaveBtn');
   const profileUsernameStatic = $('profileUsernameStatic'), profileMsg = $('profileMsg');
@@ -651,9 +752,12 @@
   const dayShareOverlay = $('dayShareOverlay'), dayShareCloseBtn = $('dayShareCloseBtn'), dayShareList = $('dayShareList');
   const badgeToastLayer = $('badgeToastLayer');
 
+  // Notifications
+  const notificationOverlay = $('notificationOverlay'), notifCloseBtn = $('notifCloseBtn'), notifList = $('notifList');
+
   let auth, db;
   let currentUser = null, currentProfile = null;
-  let isSigningUp = false, selectedRating = null, selectedSignupEmoji = null;
+  let isSigningUp = false, selectedRating = null, selectedSignupPic = null;
   let soundEnabled = true, reactionTimeout = null;
   let statsChart = null, statsDoughnut = null;
   let compareChart = null, compareBar = null, compareDoughnutA = null, compareDoughnutB = null;
@@ -663,6 +767,10 @@
   let friendshipsUnsub = null;
   let activeChatFriendUid = null, activeChatPairId = null, chatMessagesUnsub = null, chatMessageLimit = 40, chatMessagesCache = [];
   let profilePicGridBuilt = false, profileMsgTimeout = null;
+
+  // Group chat state
+  let myGroups = [], activeGroupId = null, groupMessagesUnsub = null, groupMessageLimit = 40, groupMessagesCache = [];
+  let groupsUnsub = null;
 
   // ── HELPERS ──
   function toDateStr(d) { const tz = d.getTimezoneOffset(); const l = new Date(d.getTime() - tz*60000); return l.toISOString().slice(0,10); }
@@ -697,7 +805,6 @@
     signupForm.hidden = true;
     clearAuthError();
   });
-
   signupTabBtn.addEventListener('click', function() {
     signupTabBtn.classList.add('active');
     loginTabBtn.classList.remove('active');
@@ -706,24 +813,34 @@
     clearAuthError();
   });
 
-  // ── Avatar grid builder ──
-  function buildAvatarGrid(container, onPick) {
+  // ── Profile picture grid builder (without emojis) ──
+  function buildPicGrid(container, selectedUrl, onPick) {
     container.innerHTML = '';
-    AVATAR_EMOJIS.forEach(e => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'avatar-choice';
-      btn.textContent = e;
-      btn.dataset.emoji = e;
-      btn.addEventListener('click', function() { onPick(e, btn, container); });
-      container.appendChild(btn);
+    PROFILE_PICS.forEach(pic => {
+      const div = document.createElement('div');
+      div.className = 'profile-pic-option' + (pic.url === selectedUrl ? ' selected' : '');
+      div.innerHTML = '<img src="' + escapeHtml(pic.url) + '" alt="' + escapeHtml(pic.name) + '" />';
+      div.title = pic.name;
+      div.addEventListener('click', function() { onPick(pic.url, div, container); });
+      container.appendChild(div);
     });
-  }
-  function markAvatarSelected(container, emoji) {
-    Array.from(container.children).forEach(b => b.classList.toggle('selected', b.dataset.emoji === emoji));
+    // Add a default silhouette option (no picture)
+    const defaultDiv = document.createElement('div');
+    defaultDiv.className = 'profile-pic-option' + (!selectedUrl ? ' selected' : '');
+    defaultDiv.innerHTML = '<span style="font-size:2rem;">👤</span>';
+    defaultDiv.title = 'Default avatar';
+    defaultDiv.addEventListener('click', function() { onPick(null, defaultDiv, container); });
+    container.appendChild(defaultDiv);
   }
 
-  // ── Signup submit ──
+  function markPicSelected(container, url) {
+    Array.from(container.children).forEach(el => {
+      const isSelected = (url === null && el.querySelector('span')) ? true : el.querySelector('img')?.src === url;
+      el.classList.toggle('selected', isSelected);
+    });
+  }
+
+  // ── Signup with profile pic ──
   signupForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     clearAuthError();
@@ -731,7 +848,7 @@
     const password = signupPassword.value;
     if (!/^[a-zA-Z0-9_]{3,15}$/.test(username)) return showAuthError('Username: 3–15 letters, numbers, underscores.');
     if (password.length < 6) return showAuthError('Password needs at least 6 characters.');
-    if (!selectedSignupEmoji) return showAuthError('Pick an avatar.');
+    if (!selectedSignupPic) return showAuthError('Pick a profile picture.');
 
     setAuthLoading(true);
     isSigningUp = true;
@@ -750,7 +867,7 @@
         username,
         usernameLower: username.toLowerCase(),
         displayName: username,
-        emoji: selectedSignupEmoji,
+        pic: selectedSignupPic,  // store the profile pic URL or null
         shareRatings: true,
         shareNotes: true,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -783,19 +900,20 @@
     setAuthLoading(false);
   });
 
-  // ── Reset social state ──
   function resetSocialState() {
     if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; }
     if (friendshipsUnsub) { friendshipsUnsub(); friendshipsUnsub = null; }
+    if (groupsUnsub) { groupsUnsub(); groupsUnsub = null; }
+    if (groupMessagesUnsub) { groupMessagesUnsub(); groupMessagesUnsub = null; }
     myEntries = []; myEntriesLoaded = false;
     myFriendships = []; friendsList = []; incomingRequests = []; outgoingRequests = [];
     activeChatFriendUid = null; activeChatPairId = null; chatMessagesCache = []; chatMessageLimit = 40;
+    myGroups = []; activeGroupId = null; groupMessagesCache = []; groupMessageLimit = 40;
   }
 
   logoutBtn.addEventListener('click', function() { resetSocialState(); auth.signOut(); });
   profileLogoutBtn.addEventListener('click', function() { resetSocialState(); auth.signOut(); });
 
-  // ── Load profile and show app ──
   async function loadProfileAndShowApp(user) {
     currentUser = user;
     const snap = await db.collection('users').doc(user.uid).get();
@@ -810,9 +928,9 @@
     showAppScreen();
     await runOneTimeMigration().catch(() => {});
     attachFriendshipsListener();
+    attachGroupsListener();
     await fetchMyEntries(true);
     refreshMoodFromEntries(myEntries);
-    if (!currentProfile.emoji) openAvatarPickerOverlay();
     switchTab('rate');
   }
 
@@ -821,7 +939,7 @@
     if (currentProfile.pic) {
       avatarEl.innerHTML = '<img src="' + escapeHtml(currentProfile.pic) + '" alt="avatar" />';
     } else {
-      avatarEl.textContent = currentProfile.emoji || '💩';
+      avatarEl.innerHTML = '<span class="default-avatar">👤</span>';
     }
     appUsernameText.textContent = currentProfile.displayName || currentProfile.username;
   }
@@ -844,52 +962,12 @@
       chunk.forEach(d => batch.set(d.ref, { private: false }, { merge: true }));
       await batch.commit().catch(() => {});
     }
-    // No auto‑pairing limit — removed the 2‑user forced friendship.
-  }
-
-  function openAvatarPickerOverlay() {
-    buildAvatarGrid(document.getElementById('avatarPickerGrid') || avatarPickerGrid, async function(emoji, btn, container) {
-      markAvatarSelected(container, emoji);
-      try {
-        await db.collection('users').doc(currentUser.uid).update({ emoji: emoji });
-        currentProfile.emoji = emoji;
-        updateHeaderChip();
-        document.getElementById('avatarPickerOverlay').hidden = true;
-      } catch (e) {}
-    });
-    document.getElementById('avatarPickerOverlay').hidden = false;
-  }
-
-  // ── PROFILE PIC GRID ──
-  function buildProfilePicGrid(container, selectedUrl, onPick) {
-    container.innerHTML = '';
-    PROFILE_PICS.forEach(pic => {
-      const div = document.createElement('div');
-      div.className = 'profile-pic-option' + (pic.url === selectedUrl ? ' selected' : '');
-      div.innerHTML = '<img src="' + escapeHtml(pic.url) + '" alt="' + escapeHtml(pic.name) + '" />';
-      div.title = pic.name;
-      div.addEventListener('click', function() { onPick(pic.url, div, container); });
-      container.appendChild(div);
-    });
-    // Emoji fallback option
-    const emojiDiv = document.createElement('div');
-    emojiDiv.className = 'profile-pic-option' + (!selectedUrl ? ' selected' : '');
-    emojiDiv.innerHTML = '<span class="emoji-fallback">' + (currentProfile?.emoji || '💩') + '</span>';
-    emojiDiv.title = 'Use emoji instead';
-    emojiDiv.addEventListener('click', function() { onPick(null, emojiDiv, container); });
-    container.appendChild(emojiDiv);
-  }
-
-  function markPicSelected(container, url) {
-    Array.from(container.children).forEach(el => {
-      el.classList.toggle('selected', el.dataset?.url === url);
-    });
   }
 
   // ── FRIENDS SYSTEM ──
   async function getProfile(uid) {
     const snap = await db.collection('users').doc(uid).get();
-    return snap.exists ? Object.assign({ uid }, snap.data()) : { uid, username: 'unknown', displayName: 'Unknown', emoji: '❔' };
+    return snap.exists ? Object.assign({ uid }, snap.data()) : { uid, username: 'unknown', displayName: 'Unknown', pic: null };
   }
 
   function attachFriendshipsListener() {
@@ -899,6 +977,7 @@
       .onSnapshot(async function(snap) {
         myFriendships = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
         await refreshFriendState();
+        updateNotificationDot();
       }, function() {});
   }
 
@@ -916,10 +995,49 @@
     incomingRequests = await Promise.all(incoming.map(async f => ({ id: f.id, profile: await getProfile(other(f)) })));
     outgoingRequests = await Promise.all(outgoing.map(async f => ({ id: f.id, profile: await getProfile(other(f)) })));
 
-    friendReqDot.hidden = incomingRequests.length === 0;
     if (!profilePanel.hidden) renderProfilePanel();
     if (currentTab === 'chat') loadChatTab();
     if (currentTab === 'compare') loadCompareTab();
+    updateNotificationDot();
+  }
+
+  function updateNotificationDot() {
+    const count = incomingRequests.length;
+    friendReqDot.hidden = count === 0;
+    // also update the notification button label
+    notifBtn.textContent = count > 0 ? '🔔' + count : '🔔';
+  }
+
+  // ── Notification overlay ──
+  notifBtn.addEventListener('click', function() {
+    renderNotificationList();
+    notificationOverlay.hidden = false;
+  });
+  notifCloseBtn.addEventListener('click', function() { notificationOverlay.hidden = true; });
+
+  function renderNotificationList() {
+    notifList.innerHTML = '';
+    if (incomingRequests.length === 0) {
+      notifList.innerHTML = '<div class="empty-state" style="padding:1rem;">No notifications.</div>';
+      return;
+    }
+    incomingRequests.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'friend-row';
+      const avatarHtml = r.profile.pic ? '<img src="' + escapeHtml(r.profile.pic) + '" style="width:32px;height:32px;border-radius:50%;" />' : '👤';
+      item.innerHTML = '<span style="font-size:1.2rem;">' + avatarHtml + '</span><span class="friend-row-name">' + escapeHtml(r.profile.displayName || r.profile.username) + ' wants to be friends</span><span class="friend-row-actions">';
+      const acceptBtn = document.createElement('button');
+      acceptBtn.className = 'btn-chip accept';
+      acceptBtn.textContent = 'Accept';
+      acceptBtn.addEventListener('click', function() { acceptFriendRequest(r.id); });
+      const declineBtn = document.createElement('button');
+      declineBtn.className = 'btn-chip decline';
+      declineBtn.textContent = 'Decline';
+      declineBtn.addEventListener('click', function() { endFriendship(r.id); });
+      item.querySelector('.friend-row-actions').appendChild(acceptBtn);
+      item.querySelector('.friend-row-actions').appendChild(declineBtn);
+      notifList.appendChild(item);
+    });
   }
 
   async function sendFriendRequest(usernameRaw) {
@@ -957,10 +1075,12 @@
 
   async function acceptFriendRequest(pairId) {
     try { await db.collection('friendships').doc(pairId).update({ status: 'accepted', respondedAt: firebase.firestore.FieldValue.serverTimestamp() }); } catch (e) {}
+    notificationOverlay.hidden = true;
   }
 
   async function endFriendship(pairId) {
     try { await db.collection('friendships').doc(pairId).delete(); } catch (e) {}
+    notificationOverlay.hidden = true;
   }
 
   function buildFriendSwitcher(container, activeUid, onSelect) {
@@ -971,7 +1091,8 @@
       const pill = document.createElement('button');
       pill.type = 'button';
       pill.className = 'friend-pill' + (f.uid === activeUid ? ' active' : '');
-      pill.innerHTML = '<span class="avatar-badge xs">' + (f.pic ? '<img src="' + escapeHtml(f.pic) + '" alt="" />' : escapeHtml(f.emoji || '💩')) + '</span><span>' + escapeHtml(f.displayName || f.username) + '</span>';
+      const avatarHtml = f.pic ? '<img src="' + escapeHtml(f.pic) + '" style="width:20px;height:20px;border-radius:50%;" />' : '👤';
+      pill.innerHTML = '<span class="avatar-badge xs" style="border:none;background:transparent;">' + avatarHtml + '</span><span>' + escapeHtml(f.displayName || f.username) + '</span>';
       pill.addEventListener('click', function() { onSelect(f.uid); });
       container.appendChild(pill);
     });
@@ -991,7 +1112,7 @@
     if (currentProfile.pic) {
       avatarEl.innerHTML = '<img src="' + escapeHtml(currentProfile.pic) + '" alt="profile" />';
     } else {
-      avatarEl.textContent = currentProfile.emoji || '💩';
+      avatarEl.textContent = '👤';
     }
     profileDisplayNameInput.value = currentProfile.displayName || currentProfile.username;
     profileUsernameStatic.textContent = '@' + currentProfile.username;
@@ -1003,7 +1124,7 @@
 
   function ensureProfilePicGrid() {
     if (profilePicGridBuilt) return;
-    buildProfilePicGrid(profilePicGrid, currentProfile.pic || null, async function(url, el, container) {
+    buildPicGrid(profilePicGrid, currentProfile.pic || null, async function(url, el, container) {
       const wasPic = currentProfile.pic;
       Array.from(container.children).forEach(child => child.classList.remove('selected'));
       el.classList.add('selected');
@@ -1015,7 +1136,7 @@
         if (url) {
           avatarEl.innerHTML = '<img src="' + escapeHtml(url) + '" alt="profile" />';
         } else {
-          avatarEl.textContent = currentProfile.emoji || '💩';
+          avatarEl.textContent = '👤';
         }
         showProfileMsg('Profile picture updated!');
       } catch (e) {
@@ -1087,7 +1208,8 @@
   function friendRowEl(avatar, name, actionsBuilder) {
     const row = document.createElement('div');
     row.className = 'friend-row';
-    row.innerHTML = '<span class="avatar-badge sm">' + (avatar && avatar.startsWith('http') ? '<img src="' + escapeHtml(avatar) + '" alt="" />' : escapeHtml(avatar || '💩')) + '</span><span class="friend-row-name">' + escapeHtml(name) + '</span><span class="friend-row-actions"></span>';
+    const avatarHtml = avatar && avatar.startsWith('http') ? '<img src="' + escapeHtml(avatar) + '" style="width:28px;height:28px;border-radius:50%;" />' : '👤';
+    row.innerHTML = '<span style="font-size:1.2rem;">' + avatarHtml + '</span><span class="friend-row-name">' + escapeHtml(name) + '</span><span class="friend-row-actions"></span>';
     actionsBuilder(row.querySelector('.friend-row-actions'));
     return row;
   }
@@ -1096,7 +1218,7 @@
     incomingRequestsSection.hidden = incomingRequests.length === 0;
     incomingRequestsList.innerHTML = '';
     incomingRequests.forEach(r => {
-      incomingRequestsList.appendChild(friendRowEl(r.profile.pic || r.profile.emoji, r.profile.displayName || r.profile.username, function(a) {
+      incomingRequestsList.appendChild(friendRowEl(r.profile.pic, r.profile.displayName || r.profile.username, function(a) {
         const accept = document.createElement('button');
         accept.type = 'button';
         accept.className = 'btn-chip accept';
@@ -1111,11 +1233,10 @@
         a.appendChild(decline);
       }));
     });
-
     outgoingRequestsSection.hidden = outgoingRequests.length === 0;
     outgoingRequestsList.innerHTML = '';
     outgoingRequests.forEach(r => {
-      outgoingRequestsList.appendChild(friendRowEl(r.profile.pic || r.profile.emoji, 'Waiting for ' + (r.profile.displayName || r.profile.username), function(a) {
+      outgoingRequestsList.appendChild(friendRowEl(r.profile.pic, 'Waiting for ' + (r.profile.displayName || r.profile.username), function(a) {
         const cancel = document.createElement('button');
         cancel.type = 'button';
         cancel.className = 'btn-chip decline';
@@ -1124,11 +1245,10 @@
         a.appendChild(cancel);
       }));
     });
-
     friendsEmptyMsg.hidden = friendsList.length !== 0;
     friendsListEl.innerHTML = '';
     friendsList.forEach(f => {
-      friendsListEl.appendChild(friendRowEl(f.pic || f.emoji, f.displayName || f.username, function(a) {
+      friendsListEl.appendChild(friendRowEl(f.pic, f.displayName || f.username, function(a) {
         const remove = document.createElement('button');
         remove.type = 'button';
         remove.className = 'btn-chip decline';
@@ -1160,10 +1280,9 @@
 
   // ── TABS ──
   function switchTab(name) {
-    if (currentTab === 'chat' && name !== 'chat' && chatMessagesUnsub) {
-      chatMessagesUnsub();
-      chatMessagesUnsub = null;
-      activeChatPairId = null;
+    if (currentTab === 'chat' && name !== 'chat') {
+      if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; activeChatPairId = null; }
+      if (groupMessagesUnsub) { groupMessagesUnsub(); groupMessagesUnsub = null; activeGroupId = null; }
     }
     currentTab = name;
     profilePanel.hidden = true;
@@ -1375,8 +1494,8 @@
     const myE = myEntries, frE = friendEntries;
     const myName = currentProfile.displayName || currentProfile.username;
     const frName = friend.displayName || friend.username;
-    badgeAAvatar.innerHTML = currentProfile.pic ? '<img src="' + escapeHtml(currentProfile.pic) + '" alt="" />' : (currentProfile.emoji || '💩');
-    badgeBAvatar.innerHTML = friend.pic ? '<img src="' + escapeHtml(friend.pic) + '" alt="" />' : (friend.emoji || '💩');
+    badgeAAvatar.innerHTML = currentProfile.pic ? '<img src="' + escapeHtml(currentProfile.pic) + '" style="width:100%;height:100%;object-fit:cover;" />' : '👤';
+    badgeBAvatar.innerHTML = friend.pic ? '<img src="' + escapeHtml(friend.pic) + '" style="width:100%;height:100%;object-fit:cover;" />' : '👤';
     badgeAName.textContent = myName;
     badgeBName.textContent = frName;
     const [bA, bB] = await Promise.all([fetchBadgeCount(currentUser.uid), fetchBadgeCount(friend.uid)]);
@@ -1408,18 +1527,31 @@
 
   // ── CHAT ──
   async function loadChatTab() {
+    // If no friends, show empty state
+    if (friendsList.length === 0) {
+      chatLoading.hidden = true;
+      chatEmptyState.hidden = false;
+      chatPersonalView.hidden = false;
+      chatGroupView.hidden = true;
+      chatContent.hidden = true;
+      return;
+    }
     chatLoading.hidden = false;
     chatEmptyState.hidden = true;
     chatContent.hidden = true;
-    if (friendsList.length === 0) { chatLoading.hidden = true; chatEmptyState.hidden = false; return; }
+    chatPersonalView.hidden = false;
+    chatGroupView.hidden = true;
+
+    // Personal chat
     if (!activeChatFriendUid || !friendsList.some(f => f.uid === activeChatFriendUid)) activeChatFriendUid = friendsList[0].uid;
     buildFriendSwitcher(chatFriendSwitcher, activeChatFriendUid, function(uid) { activeChatFriendUid = uid; loadChatTab(); });
     const friend = friendsList.find(f => f.uid === activeChatFriendUid);
-    chatHeaderAvatar.innerHTML = friend.pic ? '<img src="' + escapeHtml(friend.pic) + '" alt="" />' : (friend.emoji || '💩');
+    chatHeaderAvatar.innerHTML = friend.pic ? '<img src="' + escapeHtml(friend.pic) + '" style="width:32px;height:32px;border-radius:50%;" />' : '👤';
     chatHeaderName.textContent = friend.displayName || friend.username;
     chatHeaderSub.textContent = 'online';
     chatLoading.hidden = true;
     chatContent.hidden = false;
+
     const pairId = makePairId(currentUser.uid, friend.uid);
     activeChatPairId = pairId;
     if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; }
@@ -1432,6 +1564,9 @@
       if (msgs.length >= chatMessageLimit) chatLoadEarlierWrap.hidden = false;
       else chatLoadEarlierWrap.hidden = true;
     }, function() { chatHeaderSub.textContent = 'offline'; });
+
+    // Load groups
+    loadGroupsList();
   }
 
   function renderChatMessages(msgs) {
@@ -1453,7 +1588,7 @@
           b.textContent = emoji;
           b.dataset.msgId = m.id;
           b.dataset.emoji = emoji;
-          b.addEventListener('click', function() { toggleReaction(m.id, emoji); });
+          b.addEventListener('click', function() { toggleReaction(m.id, emoji, 'personal'); });
           rDiv.appendChild(b);
           const count = document.createElement('span');
           count.textContent = m.reactions[emoji];
@@ -1488,9 +1623,14 @@
 
   chatShareDayBtn.addEventListener('click', function() { if (friendsList.length === 0) return; openDayShareOverlay(); });
 
-  async function toggleReaction(msgId, emoji) {
+  async function toggleReaction(msgId, emoji, type) {
+    let ref;
+    if (type === 'personal') {
+      ref = db.collection('chats').doc(activeChatPairId).collection('messages').doc(msgId);
+    } else {
+      ref = db.collection('groups').doc(activeGroupId).collection('messages').doc(msgId);
+    }
     try {
-      const ref = db.collection('chats').doc(activeChatPairId).collection('messages').doc(msgId);
       await db.runTransaction(async (tx) => {
         const snap = await tx.get(ref);
         if (!snap.exists) return;
@@ -1514,9 +1654,214 @@
 
   document.querySelectorAll('.quick-reactions button').forEach(b => {
     b.addEventListener('click', function() {
-      chatTextInput.value += this.dataset.emoji + ' ';
-      chatTextInput.focus();
+      const input = chatTextInput;
+      input.value += this.dataset.emoji + ' ';
+      input.focus();
     });
+  });
+
+  // ── GROUP CHAT ──
+  function attachGroupsListener() {
+    if (groupsUnsub) return;
+    groupsUnsub = db.collection('groups')
+      .where('members', 'array-contains', currentUser.uid)
+      .onSnapshot(function(snap) {
+        myGroups = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+        if (currentTab === 'chat') loadGroupsList();
+      }, function() {});
+  }
+
+  function loadGroupsList() {
+    groupList.innerHTML = '';
+    if (myGroups.length === 0) {
+      groupList.innerHTML = '<div class="empty-state" style="padding:0.5rem 0;">No groups yet. Create one!</div>';
+      return;
+    }
+    myGroups.forEach(g => {
+      const div = document.createElement('div');
+      div.className = 'group-list-item' + (g.id === activeGroupId ? ' active' : '');
+      div.textContent = g.name || 'Unnamed group';
+      div.addEventListener('click', function() {
+        activeGroupId = g.id;
+        openGroupChat(g.id);
+      });
+      groupList.appendChild(div);
+    });
+  }
+
+  function openGroupChat(groupId) {
+    const group = myGroups.find(g => g.id === groupId);
+    if (!group) return;
+    groupChatName.textContent = group.name || 'Group';
+    groupChatSub.textContent = group.members.length + ' members';
+    groupChatContent.hidden = false;
+    // Load messages
+    if (groupMessagesUnsub) { groupMessagesUnsub(); groupMessagesUnsub = null; }
+    groupMessagesCache = [];
+    groupMessageLimit = 40;
+    groupMessagesUnsub = db.collection('groups').doc(groupId).collection('messages').orderBy('timestamp', 'desc').limit(groupMessageLimit).onSnapshot(function(snap) {
+      const msgs = snap.docs.map(d => Object.assign({ id: d.id }, d.data())).reverse();
+      groupMessagesCache = msgs;
+      renderGroupMessages(msgs);
+      if (msgs.length >= groupMessageLimit) groupChatLoadEarlierWrap.hidden = false;
+      else groupChatLoadEarlierWrap.hidden = true;
+    }, function() {});
+    // update active state in list
+    document.querySelectorAll('.group-list-item').forEach(el => el.classList.remove('active'));
+    // find the one with this group id and add active
+    const items = groupList.querySelectorAll('.group-list-item');
+    items.forEach(el => {
+      if (el.textContent === group.name) el.classList.add('active');
+    });
+  }
+
+  function renderGroupMessages(msgs) {
+    groupMessagesList.innerHTML = '';
+    msgs.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'chat-message ' + (m.authorId === currentUser.uid ? 'mine' : 'theirs');
+      let html = escapeHtml(m.text || '');
+      if (m.type === 'day_share' && m.data) {
+        const d = m.data;
+        html = '📅 <strong>shared a day</strong> — ' + d.rating + '/10 ' + (d.note ? '"' + escapeHtml(d.note) + '"' : '') + ' (' + formatDate(d.date) + ')';
+      }
+      div.innerHTML = html + '<div class="meta">' + formatTimestamp(m.timestamp) + ' · ' + escapeHtml(m.authorName || '') + '</div>';
+      if (m.reactions && Object.keys(m.reactions).length) {
+        const rDiv = document.createElement('div');
+        rDiv.className = 'reactions';
+        Object.keys(m.reactions).forEach(emoji => {
+          const b = document.createElement('button');
+          b.textContent = emoji;
+          b.dataset.msgId = m.id;
+          b.dataset.emoji = emoji;
+          b.addEventListener('click', function() { toggleReaction(m.id, emoji, 'group'); });
+          rDiv.appendChild(b);
+          const count = document.createElement('span');
+          count.textContent = m.reactions[emoji];
+          rDiv.appendChild(count);
+        });
+        div.appendChild(rDiv);
+      }
+      groupMessagesList.appendChild(div);
+    });
+    groupMessagesList.scrollTop = groupMessagesList.scrollHeight;
+  }
+
+  groupChatSendBtn.addEventListener('click', sendGroupMessage);
+  groupChatTextInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') sendGroupMessage(); });
+
+  async function sendGroupMessage() {
+    const text = groupChatTextInput.value.trim();
+    if (!text) return;
+    groupChatTextInput.value = '';
+    groupChatSendBtn.disabled = true;
+    try {
+      await db.collection('groups').doc(activeGroupId).collection('messages').add({
+        authorId: currentUser.uid,
+        authorName: currentProfile.displayName || currentProfile.username,
+        text: text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        reactions: {}
+      });
+    } catch (e) {}
+    groupChatSendBtn.disabled = false;
+  }
+
+  groupChatLoadEarlierBtn.addEventListener('click', function() {
+    groupMessageLimit += 30;
+    if (groupMessagesUnsub) { groupMessagesUnsub(); groupMessagesUnsub = null; }
+    const gid = activeGroupId;
+    groupMessagesUnsub = db.collection('groups').doc(gid).collection('messages').orderBy('timestamp', 'desc').limit(groupMessageLimit).onSnapshot(function(snap) {
+      const msgs = snap.docs.map(d => Object.assign({ id: d.id }, d.data())).reverse();
+      groupMessagesCache = msgs;
+      renderGroupMessages(msgs);
+      if (msgs.length >= groupMessageLimit) groupChatLoadEarlierWrap.hidden = false;
+      else groupChatLoadEarlierWrap.hidden = true;
+    }, function() {});
+  });
+
+  // ── CREATE GROUP ──
+  createGroupBtn.addEventListener('click', function() {
+    createGroupOverlay.hidden = false;
+    groupNameInput.value = '';
+    groupMemberPicker.innerHTML = '';
+    createGroupMsg.className = 'profile-msg';
+    createGroupMsg.textContent = '';
+    // Populate friends list
+    friendsList.forEach(f => {
+      const label = document.createElement('label');
+      label.style.display = 'flex';
+      label.style.alignItems = 'center';
+      label.style.gap = '6px';
+      label.style.padding = '4px 0';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = f.uid;
+      cb.checked = true; // default add all friends
+      label.appendChild(cb);
+      const avatarHtml = f.pic ? '<img src="' + escapeHtml(f.pic) + '" style="width:24px;height:24px;border-radius:50%;" />' : '👤';
+      label.innerHTML += avatarHtml + ' ' + escapeHtml(f.displayName || f.username);
+      groupMemberPicker.appendChild(label);
+    });
+    if (friendsList.length === 0) {
+      groupMemberPicker.innerHTML = '<div class="empty-state" style="padding:0.5rem 0;">Add friends first.</div>';
+      createGroupConfirmBtn.disabled = true;
+    } else {
+      createGroupConfirmBtn.disabled = false;
+    }
+  });
+
+  createGroupCloseBtn.addEventListener('click', function() { createGroupOverlay.hidden = true; });
+
+  createGroupConfirmBtn.addEventListener('click', async function() {
+    const name = groupNameInput.value.trim() || 'Unnamed group';
+    const checkboxes = groupMemberPicker.querySelectorAll('input[type="checkbox"]:checked');
+    const memberUids = Array.from(checkboxes).map(cb => cb.value);
+    if (!memberUids.includes(currentUser.uid)) memberUids.push(currentUser.uid);
+    if (memberUids.length < 2) {
+      createGroupMsg.textContent = 'Need at least 2 members (including you).';
+      createGroupMsg.className = 'profile-msg show error';
+      return;
+    }
+    try {
+      const groupRef = await db.collection('groups').add({
+        name: name,
+        members: memberUids,
+        createdBy: currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      createGroupOverlay.hidden = true;
+      // switch to group view and select this group
+      chatTypeSwitcher.querySelector('[data-type="group"]').click();
+      // refresh groups list
+      loadGroupsList();
+      // open this group
+      activeGroupId = groupRef.id;
+      openGroupChat(groupRef.id);
+    } catch (e) {
+      createGroupMsg.textContent = 'Failed to create group.';
+      createGroupMsg.className = 'profile-msg show error';
+    }
+  });
+
+  // ── Chat type switcher ──
+  chatTypeSwitcher.addEventListener('click', function(e) {
+    const btn = e.target.closest('.chat-type-btn');
+    if (!btn) return;
+    chatTypeSwitcher.querySelectorAll('.chat-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (btn.dataset.type === 'personal') {
+      chatPersonalView.hidden = false;
+      chatGroupView.hidden = true;
+      if (friendsList.length > 0) loadChatTab();
+    } else {
+      chatPersonalView.hidden = true;
+      chatGroupView.hidden = false;
+      loadGroupsList();
+      // hide group chat content if no group selected
+      if (!activeGroupId) groupChatContent.hidden = true;
+      else openGroupChat(activeGroupId);
+    }
   });
 
   // ── DAY SHARE ──
@@ -1573,11 +1918,14 @@
     firebase.initializeApp(firebaseConfig);
     auth = firebase.auth();
     db = firebase.firestore();
-    buildAvatarGrid(signupAvatarGrid, function(emoji, btn, container) {
-      selectedSignupEmoji = emoji;
-      markAvatarSelected(container, emoji);
+
+    // Build signup pic grid
+    buildPicGrid(signupPicGrid, null, function(url, el, container) {
+      selectedSignupPic = url;
+      markPicSelected(container, url);
       signupSubmitBtn.disabled = false;
     });
+
     auth.onAuthStateChanged(async function(user) {
       if (isSigningUp) return;
       if (user) await loadProfileAndShowApp(user);
