@@ -1,18 +1,7 @@
-
 <!DOCTYPE html>
 <!--
-  Shitty Human
-  v4: public/friends/private profile visibility with an Instagram-style
-  viewable profile for other users, numbered notification badges (header
-  + chat tab, with per-friend unread counts), Settings split out from
-  Profile, a fixed 10-code Premium system that gates photo-sharing in
-  chat (Firebase Storage), more citations with a premium "preview locked
-  ones" perk, extra stats/compare insights, a full-height mobile chat
-  layout, and account deletion (reauth + tombstone profile, history kept
-  intact for the other person).
-  Needs THREE companion files: firestore.rules, storage.rules (both new
-  console tabs — Storage rules are separate from Firestore rules), and
-  SETUP-NOTES.md.
+  Shitty Human — final working version with notifications
+  Requires Firestore Security Rules (see comments at end of this file)
 -->
 <html lang="en">
 <head>
@@ -31,7 +20,7 @@
   --brand: #AD8750; --brand-hi: #C9A165; --brand-ink: #1B1409;
   --grade-f: #A5514B; --grade-c: #8C8377; --grade-b: #6E8C7A; --grade-a: #C9A165;
   --danger: #A5514B;
-  --premium-blue: #4A90D9; --premium-blue-dim: #2A4A7A;
+  --premium-blue: #4A90D9;
   --font-display: 'Source Serif 4', Georgia, serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
@@ -825,9 +814,8 @@ const redeemCodeInput = $('redeemCodeInput'), redeemCodeBtn = $('redeemCodeBtn')
 const openDeleteAccountBtn = $('openDeleteAccountBtn'), profileLogoutBtn = $('profileLogoutBtn');
 
 const notificationsBackBtn = $('notificationsBackBtn');
-const incomingRequestsList = $('incomingRequestsList');
-const outgoingRequestsSection = $('outgoingRequestsSection'), outgoingRequestsList = $('outgoingRequestsList');
 const notifList = $('notifList');
+const outgoingRequestsSection = $('outgoingRequestsSection'), outgoingRequestsList = $('outgoingRequestsList');
 
 const findPeopleBackBtn = $('findPeopleBackBtn'), findPeopleInput = $('findPeopleInput'), findPeopleSearchBtn = $('findPeopleSearchBtn');
 const findPeopleMsg = $('findPeopleMsg'), findPeopleResult = $('findPeopleResult');
@@ -2231,4 +2219,3 @@ document.addEventListener('DOMContentLoaded', boot);
 </script>
 </body>
 </html>
-```
