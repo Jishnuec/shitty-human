@@ -30,6 +30,7 @@
   --brand: #AD8750; --brand-hi: #C9A165; --brand-ink: #1B1409;
   --grade-f: #A5514B; --grade-c: #8C8377; --grade-b: #6E8C7A; --grade-a: #C9A165;
   --danger: #A5514B;
+  --premium-blue: #4A90D9; --premium-blue-dim: #2A4A7A;
   --font-display: 'Source Serif 4', Georgia, serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
@@ -119,7 +120,7 @@ code { background: var(--bg-2); border: 1px solid var(--line-strong); padding: 1
 .avatar-badge.lg { width: 68px; height: 68px; box-shadow: 0 8px 20px rgba(0,0,0,.4); }
 .avatar-badge.xl { width: 90px; height: 90px; box-shadow: 0 8px 20px rgba(0,0,0,.4); }
 .member-num { font-family: var(--font-mono); font-size: .85em; color: var(--ink-faint); }
-.premium-tick { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--brand); color: var(--brand-ink); font-size: 10px; font-weight: 700; vertical-align: middle; }
+.premium-tick { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--premium-blue); color: #fff; font-size: 10px; font-weight: 700; vertical-align: middle; margin-left: 4px; }
 
 .count-badge { position: absolute; top: -6px; right: -6px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); line-height: 1; border: 2px solid var(--bg-0); }
 .tab-btn .count-badge { top: -4px; right: 6px; }
@@ -274,7 +275,6 @@ code { background: var(--bg-2); border: 1px solid var(--line-strong); padding: 1
 .msg-row.mine { align-self: flex-end; align-items: flex-end; }
 .msg-row.theirs { align-self: flex-start; align-items: flex-start; }
 .msg-bubble { background: var(--bg-2); border: 1px solid var(--line-strong); border-radius: 14px; padding: 9px 13px; }
-.msg-bubble.has-image { padding: 6px; }
 .msg-row.mine .msg-bubble { background: var(--brand); color: var(--brand-ink); border-color: transparent; }
 .msg-text { font-size: 13.5px; line-height: 1.42; word-break: break-word; white-space: pre-wrap; }
 .msg-meta { font-family: var(--font-mono); font-size: 9.5px; color: var(--ink-faint); margin-top: 4px; text-align: right; padding: 0 4px 2px; }
@@ -287,7 +287,6 @@ code { background: var(--bg-2); border: 1px solid var(--line-strong); padding: 1
 .day-share-note { margin-top: 8px; font-size: 12px; padding: 8px 10px; background: rgba(0,0,0,.2); border-radius: 9px; line-height: 1.4; }
 .msg-row.mine .day-share-note { background: rgba(0,0,0,.12); }
 .day-share-note.muted { font-style: italic; opacity: .75; }
-.msg-image { max-width: 220px; width: 100%; border-radius: 9px; display: block; }
 .msg-reactions { display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap; position: relative; }
 .reaction-pill { font-size: 11px; background: var(--bg-1); border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px 8px; color: var(--ink-dim); }
 .reaction-pill.mine { border-color: var(--brand); color: var(--brand-hi); }
@@ -475,8 +474,6 @@ footer { text-align: center; color: var(--ink-faint); font-size: 11.5px; padding
           </div>
           <form class="chat-composer" id="chatComposerForm">
             <button type="button" class="chat-icon-btn" id="chatShareDayBtn" aria-label="Share a rated day" title="Share a rated day">📋</button>
-            <button type="button" class="chat-icon-btn" id="chatPhotoBtn" aria-label="Send a photo (Premium)" title="Send a photo (Premium)">📷</button>
-            <input type="file" id="chatPhotoInput" accept="image/*" hidden />
             <input type="text" id="chatTextInput" maxlength="500" placeholder="Say something…" autocomplete="off" />
             <button type="submit" class="chat-send-btn" id="chatSendBtn">Send</button>
           </form>
@@ -631,10 +628,10 @@ footer { text-align: center; color: var(--ink-faint); font-size: 11.5px; padding
       <div class="card">
         <h2>Premium</h2>
         <div id="premiumUnlockedView" hidden>
-          <div class="premium-unlocked-row"><span class="tick-big">✓</span><div><strong>Premium unlocked</strong><div style="font-size:12px; color:var(--ink-dim); margin-top:2px;">You can send photos in chat, and preview locked citations.</div></div></div>
+          <div class="premium-unlocked-row"><span class="tick-big">✓</span><div><strong>Premium unlocked</strong><div style="font-size:12px; color:var(--ink-dim); margin-top:2px;">You can preview locked citations.</div></div></div>
         </div>
         <div id="premiumLockedView">
-          <p style="font-size:12.5px; color:var(--ink-dim); margin:0 0 12px; line-height:1.5;">Redeem a code to unlock photo-sharing in chat and citation previews. Ask whoever set this app up for a code.</p>
+          <p style="font-size:12.5px; color:var(--ink-dim); margin:0 0 12px; line-height:1.5;">Redeem a code to unlock citation previews. Ask whoever set this app up for a code.</p>
           <div class="add-friend-row">
             <input type="text" id="redeemCodeInput" placeholder="Enter a code" maxlength="20" />
             <button type="button" class="btn-ghost" id="redeemCodeBtn">Redeem</button>
@@ -714,7 +711,6 @@ footer { text-align: center; color: var(--ink-faint); font-size: 11.5px; padding
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.15.0/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.15.0/firebase-auth-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.15.0/firebase-firestore-compat.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.15.0/firebase-storage-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
 
 <script>
@@ -794,7 +790,7 @@ const alreadyRatedNote = $('alreadyRatedNote'), reactionCard = $('reactionCard')
 const chatFriendSwitcher = $('chatFriendSwitcher'), chatEmptyState = $('chatEmptyState'), chatContent = $('chatContent');
 const chatHeaderAvatar = $('chatHeaderAvatar'), chatHeaderName = $('chatHeaderName'), chatHeaderSub = $('chatHeaderSub');
 const chatMessagesList = $('chatMessagesList'), chatLoadEarlierWrap = $('chatLoadEarlierWrap'), chatLoadEarlierBtn = $('chatLoadEarlierBtn');
-const chatComposerForm = $('chatComposerForm'), chatShareDayBtn = $('chatShareDayBtn'), chatPhotoBtn = $('chatPhotoBtn'), chatPhotoInput = $('chatPhotoInput');
+const chatComposerForm = $('chatComposerForm'), chatShareDayBtn = $('chatShareDayBtn');
 const chatTextInput = $('chatTextInput'), chatSendBtn = $('chatSendBtn');
 
 const statsLoading = $('statsLoading'), statsEmpty = $('statsEmpty'), statsContent = $('statsContent');
@@ -842,7 +838,7 @@ const deleteConfirmUsername = $('deleteConfirmUsername'), deleteConfirmPassword 
 const badgeToastLayer = $('badgeToastLayer');
 
 // ===================== STATE =====================
-let auth, db, storage;
+let auth, db;
 let currentUser = null, currentProfile = null;
 let isSigningUp = false;
 let selectedRating = null;
@@ -874,7 +870,6 @@ let chatMessageLimit = 40;
 let chatMessagesCache = [];
 let profileEmojiGridBuilt = false;
 let profileMsgTimeout = null;
-let uploadingPhoto = false;
 
 // ===================== DATE HELPERS =====================
 function toDateStr(d) { const tz = d.getTimezoneOffset(); const l = new Date(d.getTime() - tz*60000); return l.toISOString().slice(0,10); }
@@ -893,7 +888,7 @@ function nameLabel(profile) {
   if (!profile) return 'Unknown';
   let s = profile.deleted ? 'Former Shitty Human' : (profile.displayName || profile.username || 'Unknown');
   if (typeof profile.memberNumber === 'number') s += ' #' + profile.memberNumber;
-  if (profile.isPremium && !profile.deleted) s += ' ✓';
+  if (profile.isPremium && !profile.deleted) s += ' <span class="premium-tick">✓</span>';
   return s;
 }
 function setCountBadge(el, n) { if (n > 0) { el.hidden = false; el.textContent = n > 99 ? '99+' : String(n); } else { el.hidden = true; } }
@@ -1131,7 +1126,14 @@ async function loadProfileAndShowApp(user) {
   if (!currentProfile.avatarId) openAvatarPickerOverlay();
   switchTab('rate');
 }
-function updateHeaderChip() { setAvatar(appAvatarBadge, currentProfile.avatarId); appUsernameText.textContent = currentProfile.displayName || currentProfile.username; }
+function updateHeaderChip() {
+  setAvatar(appAvatarBadge, currentProfile.avatarId);
+  let name = currentProfile.displayName || currentProfile.username;
+  if (currentProfile.isPremium && !currentProfile.deleted) {
+    name += ' <span class="premium-tick">✓</span>';
+  }
+  appUsernameText.innerHTML = name;
+}
 
 function openAvatarPickerOverlay() {
   buildAvatarGrid(avatarPickerGrid, async (avatarId, btn, container) => {
@@ -1300,7 +1302,7 @@ function friendRowEl(avatarId, label, actionsBuilder, onClickName) {
   const row = document.createElement('div');
   row.className = 'friend-row';
   row.innerHTML = '<span class="avatar-badge sm">'+avatarInnerHtml(avatarId)+'</span>' +
-    '<span class="friend-row-name'+(onClickName?' clickable':'')+'">'+escapeHtml(label)+'</span>' +
+    '<span class="friend-row-name'+(onClickName?' clickable':'')+'">'+label+'</span>' +
     '<span class="friend-row-actions"></span>';
   if (onClickName) row.querySelector('.friend-row-name').addEventListener('click', onClickName);
   actionsBuilder(row.querySelector('.friend-row-actions'));
@@ -1361,7 +1363,10 @@ async function renderProfileScreen() {
   profileEditRow.hidden = !canEditAvatar;
   if (canEditAvatar) profileDisplayNameInput.value = profile.displayName || profile.username;
   profileNameDisplay.hidden = canEditAvatar;
-  if (!canEditAvatar) profileNameDisplay.textContent = nameLabel(profile);
+  if (!canEditAvatar) {
+    const label = nameLabel(profile);
+    profileNameDisplay.innerHTML = label;
+  }
 
   profileUsernameStatic.textContent = '@' + profile.username + (typeof profile.memberNumber === 'number' ? ' · #' + profile.memberNumber : '');
   profileTombstoneBanner.hidden = !profile.deleted;
@@ -1750,12 +1755,13 @@ function hasEarlyBird(entries) { return entries.some(e => typeof e.ratedAtHour =
 function hasNightOwl(entries) { return entries.some(e => typeof e.ratedAtHour === 'number' && e.ratedAtHour >= 23); }
 function hasCentury(entries) { return entries.length >= 100; }
 function hasTagTeam(entries, ctx) { return !!(ctx && ctx.hasFriend); }
-function hasPhotographer(entries, ctx) { return !!(ctx && ctx.hasSentPhoto); }
 function hasPopular(entries, ctx) { return !!(ctx && ctx.isPublic); }
 function hasNetworker(entries, ctx) { return !!(ctx && ctx.friendCount >= 3); }
 function hasChatterbox(entries, ctx) { return !!(ctx && ctx.messagesSent >= 50); }
 function hasHistorian(entries) { return entries.length >= 365; }
 function hasComeback(entries) { return consecutiveDateRuns(entries).some(run => { for (let i=0;i+1<run.length;i++) if (run[i].rating<=3 && run[i+1].rating>=9) return true; return false; }); }
+
+// REMOVED photographer badge
 
 const BADGE_DEFS = [
   { id:'slump', emoji:'🌧️', name:'The Slump', desc:'Survived 3 rough days (below 4) in a row', check:hasSlump },
@@ -1766,7 +1772,6 @@ const BADGE_DEFS = [
   { id:'night_owl', emoji:'🦉', name:'Night Owl', desc:'Rated your day after 11pm', check:hasNightOwl },
   { id:'century', emoji:'💯', name:'Century Club', desc:'Logged 100 days total', check:hasCentury },
   { id:'tag_team', emoji:'🤝', name:'Tag Team', desc:'Connected with a friend', check:hasTagTeam },
-  { id:'photographer', emoji:'📸', name:'Photographer', desc:'Sent a photo in chat', check:hasPhotographer },
   { id:'popular', emoji:'🌟', name:'Popular', desc:'Set your profile to Public', check:hasPopular },
   { id:'networker', emoji:'🕸️', name:'Networker', desc:'Made 3 or more friends', check:hasNetworker },
   { id:'chatterbox', emoji:'💬', name:'Chatterbox', desc:'Sent 50+ chat messages', check:hasChatterbox },
@@ -1790,7 +1795,7 @@ async function refreshBadges(entries) {
   const existingSnap = await badgesRef.get();
   const unlockedIds = new Set(existingSnap.docs.map(d=>d.id));
   const newlyUnlocked = [];
-  const ctx = { hasFriend: friendsList.length > 0, isPublic: currentProfile.profileVisibility === 'public', friendCount: friendsList.length, messagesSent: currentProfile.messagesSent || 0, hasSentPhoto: unlockedIds.has('photographer') };
+  const ctx = { hasFriend: friendsList.length > 0, isPublic: currentProfile.profileVisibility === 'public', friendCount: friendsList.length, messagesSent: currentProfile.messagesSent || 0 };
   for (const def of BADGE_DEFS) {
     if (unlockedIds.has(def.id)) continue;
     if (def.check(entries, ctx)) {
@@ -1910,8 +1915,8 @@ async function loadCompareTab() {
 
   setAvatar(badgeAAvatar, currentProfile.avatarId);
   setAvatar(badgeBAvatar, friend.avatarId);
-  badgeAName.textContent = nameLabel(currentProfile);
-  badgeBName.textContent = nameLabel(friend);
+  badgeAName.innerHTML = nameLabel(currentProfile);
+  badgeBName.innerHTML = nameLabel(friend);
   badgeAAvatar.onclick = () => openProfileFor(currentUser.uid);
   badgeBAvatar.onclick = () => openProfileFor(friend.uid);
 
@@ -2002,11 +2007,7 @@ function buildMessageEl(m) {
   const wrap = document.createElement('div'); wrap.className = 'msg-row ' + (mine ? 'mine' : 'theirs');
   const bubble = document.createElement('div'); bubble.className = 'msg-bubble' + (m.type === 'day_share' ? ' day-share' : '');
   if (m.type === 'day_share' && m.dayShare) { bubble.innerHTML = buildDayShareCardHtml(m.dayShare); }
-  else if (m.type === 'image' && m.imageUrl) {
-    bubble.classList.add('has-image');
-    const img = document.createElement('img'); img.className = 'msg-image'; img.src = m.imageUrl; img.loading = 'lazy'; img.alt = 'Shared photo';
-    bubble.appendChild(img);
-  } else {
+  else {
     const p = document.createElement('div'); p.className = 'msg-text'; p.textContent = m.text || '';
     bubble.appendChild(p);
   }
@@ -2042,7 +2043,6 @@ function openChatWith(friendUid) {
   chatHeaderSub.textContent = '@' + friend.username + (typeof friend.memberNumber === 'number' ? ' · #' + friend.memberNumber : '');
   chatHeaderAvatar.onclick = () => openProfileFor(friendUid);
   chatHeaderName.onclick = () => openProfileFor(friendUid);
-  chatPhotoBtn.title = currentProfile.isPremium ? 'Send a photo' : 'Send a photo (Premium)';
 
   const pairId = makePairId(currentUser.uid, friendUid);
   db.collection('friendships').doc(pairId).update({ ['unreadFor.' + currentUser.uid]: 0 }).catch(()=>{});
@@ -2113,39 +2113,6 @@ async function shareDayToChat(entry) {
   await batch.commit();
   playPopSound(); bumpMessagesSent();
 }
-function resizeImageFile(file, maxDim, quality) {
-  return new Promise((resolve, reject) => {
-    const img = new Image(); const reader = new FileReader();
-    reader.onload = (e) => { img.src = e.target.result; };
-    reader.onerror = reject;
-    img.onload = () => {
-      let w = img.width, h = img.height;
-      if (w > maxDim || h > maxDim) { if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; } else { w = Math.round(w * maxDim / h); h = maxDim; } }
-      const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      canvas.toBlob((blob) => { if (blob) resolve(blob); else reject(new Error('toBlob failed')); }, 'image/jpeg', quality);
-    };
-    img.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-async function sendImageMessage(file) {
-  const pairId = activeChatPairId, friendUid = activeChatFriendUid;
-  const blob = await resizeImageFile(file, 1600, 0.82);
-  const path = 'chat-images/' + pairId + '/' + currentUser.uid + '_' + Date.now() + '.jpg';
-  const ref = storage.ref().child(path);
-  await ref.put(blob, { contentType: 'image/jpeg' });
-  const url = await ref.getDownloadURL();
-  const msgRef = db.collection('friendships').doc(pairId).collection('messages').doc();
-  const payload = { type:'image', imageUrl:url, senderUid: currentUser.uid, senderName: currentProfile.displayName||currentProfile.username, reactions:{}, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
-  const batch = db.batch();
-  batch.set(msgRef, payload);
-  const fUpdate = { lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(), lastMessageText: (currentProfile.displayName||currentProfile.username) + ' sent a photo' };
-  fUpdate['unreadFor.' + friendUid] = firebase.firestore.FieldValue.increment(1);
-  batch.set(db.collection('friendships').doc(pairId), fUpdate, { merge:true });
-  await batch.commit();
-  playPopSound(); bumpMessagesSent(); awardBadgeNow('photographer');
-}
 chatComposerForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const text = chatTextInput.value.trim();
@@ -2159,18 +2126,6 @@ chatLoadEarlierBtn.addEventListener('click', () => {
   if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; }
   activeChatPairId = null;
   openChatWith(uid);
-});
-chatPhotoBtn.addEventListener('click', () => {
-  if (!currentProfile.isPremium) { alert('Photo sharing is a Premium feature — redeem a code from Settings.'); return; }
-  chatPhotoInput.click();
-});
-chatPhotoInput.addEventListener('change', async () => {
-  const file = chatPhotoInput.files[0]; chatPhotoInput.value = '';
-  if (!file || uploadingPhoto || !activeChatPairId) return;
-  if (!file.type.startsWith('image/')) { alert('Please choose an image file.'); return; }
-  uploadingPhoto = true; chatPhotoBtn.disabled = true;
-  try { await sendImageMessage(file); } catch (err) { console.error(err); alert('Could not send that photo — try again.'); }
-  uploadingPhoto = false; chatPhotoBtn.disabled = false;
 });
 async function openDayShareOverlay() {
   if (!activeChatPairId) return;
@@ -2201,7 +2156,6 @@ function boot() {
   firebase.initializeApp(firebaseConfig);
   auth = firebase.auth();
   db = firebase.firestore();
-  storage = firebase.storage();
 
   buildAvatarGrid(signupAvatarGrid, (avatarId, btn, container) => {
     selectedSignupAvatarId = avatarId; markAvatarSelected(container, avatarId); signupSubmitBtn.disabled = false;
