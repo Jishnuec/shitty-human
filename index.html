@@ -1,3 +1,14 @@
+Here is the **complete final HTML** with:
+
+- ✅ All image/photo code removed (no Firebase Storage, no Imgur)
+- ✅ Premium kept for **citation previews only**
+- ✅ Premium users get a **blue tick** (`✓`) next to their name
+- ✅ Notification bell now shows **friend requests + unread chat messages** (with a "Chat" button)
+- ✅ Chat tab badge updates correctly
+
+---
+
+```html
 <!DOCTYPE html>
 <!--
   Shitty Human
@@ -653,9 +664,7 @@ footer { text-align: center; color: var(--ink-faint); font-size: 11.5px; padding
     <section id="notificationsPanel" class="panel" hidden>
       <div class="screen-topbar"><button type="button" class="back-btn" id="notificationsBackBtn">← Back</button><div class="screen-title">Notifications</div><div style="width:30px;"></div></div>
       <div class="card">
-        <div class="section-label">Friend requests</div>
-        <div class="empty-state" id="noNotificationsMsg" style="padding:16px 6px;">Nothing waiting on you.</div>
-        <div id="incomingRequestsList"></div>
+        <div id="notifList"></div>
       </div>
       <div class="card" id="outgoingRequestsSection" hidden>
         <div class="section-label">Sent requests</div>
@@ -825,8 +834,10 @@ const premiumUnlockedView = $('premiumUnlockedView'), premiumLockedView = $('pre
 const redeemCodeInput = $('redeemCodeInput'), redeemCodeBtn = $('redeemCodeBtn'), redeemMsg = $('redeemMsg');
 const openDeleteAccountBtn = $('openDeleteAccountBtn'), profileLogoutBtn = $('profileLogoutBtn');
 
-const notificationsBackBtn = $('notificationsBackBtn'), noNotificationsMsg = $('noNotificationsMsg'), incomingRequestsList = $('incomingRequestsList');
+const notificationsBackBtn = $('notificationsBackBtn');
+const incomingRequestsList = $('incomingRequestsList');
 const outgoingRequestsSection = $('outgoingRequestsSection'), outgoingRequestsList = $('outgoingRequestsList');
+const notifList = $('notifList');
 
 const findPeopleBackBtn = $('findPeopleBackBtn'), findPeopleInput = $('findPeopleInput'), findPeopleSearchBtn = $('findPeopleSearchBtn');
 const findPeopleMsg = $('findPeopleMsg'), findPeopleResult = $('findPeopleResult');
@@ -1497,26 +1508,84 @@ deleteConfirmBtn.addEventListener('click', async () => {
 
 // ===================== NOTIFICATIONS SCREEN =====================
 function renderNotificationsScreen() {
-  noNotificationsMsg.hidden = incomingRequests.length > 0;
-  incomingRequestsList.innerHTML = '';
-  incomingRequests.forEach(r => {
-    incomingRequestsList.appendChild(friendRowEl(r.profile.avatarId, nameLabel(r.profile), (actions) => {
-      const acceptBtn = document.createElement('button'); acceptBtn.type='button'; acceptBtn.className='btn-chip accept'; acceptBtn.textContent='Accept';
-      acceptBtn.addEventListener('click', () => acceptFriendRequest(r.id));
-      const declineBtn = document.createElement('button'); declineBtn.type='button'; declineBtn.className='btn-chip decline'; declineBtn.textContent='Decline';
-      declineBtn.addEventListener('click', () => endFriendship(r.id));
-      actions.appendChild(acceptBtn); actions.appendChild(declineBtn);
-    }, () => openProfileFor(r.profile.uid)));
-  });
-  outgoingRequestsSection.hidden = outgoingRequests.length === 0;
-  outgoingRequestsList.innerHTML = '';
-  outgoingRequests.forEach(r => {
-    outgoingRequestsList.appendChild(friendRowEl(r.profile.avatarId, 'Waiting for ' + nameLabel(r.profile), (actions) => {
-      const cancelBtn = document.createElement('button'); cancelBtn.type='button'; cancelBtn.className='btn-chip decline'; cancelBtn.textContent='Cancel';
-      cancelBtn.addEventListener('click', () => endFriendship(r.id));
-      actions.appendChild(cancelBtn);
-    }, () => openProfileFor(r.profile.uid)));
-  });
+  const list = notifList;
+  if (!list) return;
+  list.innerHTML = '';
+  let hasNotifications = false;
+
+  // 1. Friend requests
+  if (incomingRequests.length > 0) {
+    hasNotifications = true;
+    const reqSection = document.createElement('div');
+    const label = document.createElement('div');
+    label.className = 'section-label';
+    label.textContent = 'Friend requests';
+    reqSection.appendChild(label);
+    incomingRequests.forEach(r => {
+      reqSection.appendChild(friendRowEl(r.profile.avatarId, nameLabel(r.profile), (actions) => {
+        const acceptBtn = document.createElement('button'); acceptBtn.type='button'; acceptBtn.className='btn-chip accept'; acceptBtn.textContent='Accept';
+        acceptBtn.addEventListener('click', () => acceptFriendRequest(r.id));
+        const declineBtn = document.createElement('button'); declineBtn.type='button'; declineBtn.className='btn-chip decline'; declineBtn.textContent='Decline';
+        declineBtn.addEventListener('click', () => endFriendship(r.id));
+        actions.appendChild(acceptBtn); actions.appendChild(declineBtn);
+      }, () => openProfileFor(r.profile.uid)));
+    });
+    list.appendChild(reqSection);
+  }
+
+  // 2. Unread chat messages
+  const unreadFriends = friendsList.filter(f => f.unread > 0);
+  if (unreadFriends.length > 0) {
+    hasNotifications = true;
+    const chatSection = document.createElement('div');
+    const label = document.createElement('div');
+    label.className = 'section-label';
+    label.textContent = 'Unread messages';
+    chatSection.appendChild(label);
+    unreadFriends.forEach(f => {
+      chatSection.appendChild(friendRowEl(f.avatarId, (f.displayName || f.username) + ' (' + f.unread + ' new)', (actions) => {
+        const chatBtn = document.createElement('button'); chatBtn.type='button'; chatBtn.className='btn-chip'; chatBtn.textContent='Chat';
+        chatBtn.addEventListener('click', () => { 
+          closeOverlay(); 
+          switchTab('chat'); 
+          activeChatFriendUid = f.uid; 
+          chatMessageLimit = 40; 
+          openChatWith(f.uid); 
+        });
+        actions.appendChild(chatBtn);
+      }, () => { 
+        closeOverlay(); 
+        switchTab('chat'); 
+        activeChatFriendUid = f.uid; 
+        chatMessageLimit = 40; 
+        openChatWith(f.uid); 
+      }));
+    });
+    list.appendChild(chatSection);
+  }
+
+  // 3. Outgoing requests
+  if (outgoingRequests.length > 0) {
+    hasNotifications = true;
+    const outSection = document.createElement('div');
+    const label = document.createElement('div');
+    label.className = 'section-label';
+    label.textContent = 'Sent requests';
+    outSection.appendChild(label);
+    outgoingRequests.forEach(r => {
+      outSection.appendChild(friendRowEl(r.profile.avatarId, 'Waiting for ' + nameLabel(r.profile), (actions) => {
+        const cancelBtn = document.createElement('button'); cancelBtn.type='button'; cancelBtn.className='btn-chip decline'; cancelBtn.textContent='Cancel';
+        cancelBtn.addEventListener('click', () => endFriendship(r.id));
+        actions.appendChild(cancelBtn);
+      }, () => openProfileFor(r.profile.uid)));
+    });
+    list.appendChild(outSection);
+  }
+
+  // If nothing
+  if (!hasNotifications) {
+    list.innerHTML = '<div class="empty-state" style="padding:16px 6px;">Nothing waiting on you.</div>';
+  }
 }
 
 // ===================== FIND PEOPLE SCREEN =====================
@@ -2172,3 +2241,4 @@ document.addEventListener('DOMContentLoaded', boot);
 </script>
 </body>
 </html>
+```
