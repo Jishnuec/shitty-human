@@ -277,6 +277,14 @@ code { background: var(--bg-2); border: 1px solid var(--line-strong); padding: 1
 .day-share-note { margin-top: 8px; font-size: 12px; padding: 8px 10px; background: rgba(0,0,0,.2); border-radius: 9px; line-height: 1.4; }
 .msg-row.mine .day-share-note { background: rgba(0,0,0,.12); }
 .day-share-note.muted { font-style: italic; opacity: .75; }
+.voice-msg { display: flex; align-items: center; gap: 9px; min-width: 168px; }
+.voice-play-btn { width: 28px; height: 28px; border-radius: 50%; border: none; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.14); color: inherit; font-size: 11px; padding: 0; }
+.msg-row.mine .voice-play-btn { background: rgba(0,0,0,.18); }
+.voice-track { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.14); position: relative; overflow: hidden; }
+.msg-row.mine .voice-track { background: rgba(0,0,0,.18); }
+.voice-track-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--brand-hi); border-radius: 2px; }
+.msg-row.mine .voice-track-fill { background: var(--brand-ink); opacity: .55; }
+.voice-time { font-family: var(--font-mono); font-size: 10.5px; opacity: .85; flex-shrink: 0; }
 .msg-reactions { display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap; position: relative; }
 .reaction-pill { font-size: 11px; background: var(--bg-1); border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px 8px; color: var(--ink-dim); }
 .reaction-pill.mine { border-color: var(--brand); color: var(--brand-hi); }
@@ -291,6 +299,14 @@ code { background: var(--bg-2); border: 1px solid var(--line-strong); padding: 1
 .chat-icon-btn:disabled { opacity: .35; }
 .chat-send-btn { border: none; border-radius: 999px; padding: 10px 15px; background: var(--brand); color: var(--brand-ink); font-weight: 700; font-size: 12.5px; flex-shrink: 0; }
 .chat-send-btn:disabled { opacity: .5; }
+.chat-voice-rec, .chat-voice-preview { display: flex; align-items: center; gap: 8px; width: 100%; }
+.chat-voice-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--danger); flex-shrink: 0; animation: voiceDotPulse 1.1s ease-in-out infinite; }
+@keyframes voiceDotPulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+.chat-voice-time { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink); flex-shrink: 0; min-width: 30px; }
+.chat-voice-hint { font-size: 11.5px; color: var(--ink-dim); flex: 1; }
+.chat-voice-cancel { color: var(--danger); }
+.chat-voice-preview #chatVoicePlayBtn { font-size: 12px; }
+@media (prefers-reduced-motion: reduce) { .chat-voice-dot { animation: none; } }
 .chat-load-earlier-wrap { text-align: center; margin-bottom: 8px; }
 .day-share-pick-row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 4px; border-bottom: 1px solid var(--line); background: none; border-left: none; border-right: none; border-top: none; color: var(--ink); text-align: left; }
 .day-share-pick-row:hover { background: rgba(255,255,255,.03); }
@@ -465,8 +481,25 @@ footer { text-align: center; color: var(--ink-faint); font-size: 11.5px; padding
           <form class="chat-composer" id="chatComposerForm">
             <button type="button" class="chat-icon-btn" id="chatShareDayBtn" aria-label="Share a rated day" title="Share a rated day">📋</button>
             <input type="text" id="chatTextInput" maxlength="500" placeholder="Say something…" autocomplete="off" />
+            <button type="button" class="chat-icon-btn" id="chatVoiceBtn" aria-label="Record a voice note" title="Record a voice note">🎙️</button>
             <button type="submit" class="chat-send-btn" id="chatSendBtn">Send</button>
           </form>
+          <div class="chat-composer chat-voice-bar" id="chatVoiceBar" hidden>
+            <div class="chat-voice-rec" id="chatVoiceRecUi">
+              <span class="chat-voice-dot" aria-hidden="true"></span>
+              <span class="chat-voice-time" id="chatVoiceTime">0:00</span>
+              <span class="chat-voice-hint">Recording… auto-stops at 0:30</span>
+              <button type="button" class="chat-icon-btn chat-voice-cancel" id="chatVoiceCancelBtn" aria-label="Cancel recording" title="Cancel">🗑</button>
+              <button type="button" class="chat-send-btn" id="chatVoiceStopBtn">Stop</button>
+            </div>
+            <div class="chat-voice-preview" id="chatVoicePreviewUi" hidden>
+              <button type="button" class="chat-icon-btn" id="chatVoicePlayBtn" aria-label="Play recording">▶</button>
+              <span class="chat-voice-time" id="chatVoicePreviewTime">0:00</span>
+              <span class="chat-voice-hint" id="chatVoiceSize"></span>
+              <button type="button" class="chat-icon-btn chat-voice-cancel" id="chatVoiceDiscardBtn" aria-label="Discard recording" title="Discard">🗑</button>
+              <button type="button" class="chat-send-btn" id="chatVoiceSendBtn">Send</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -780,6 +813,9 @@ const chatHeaderAvatar = $('chatHeaderAvatar'), chatHeaderName = $('chatHeaderNa
 const chatMessagesList = $('chatMessagesList'), chatLoadEarlierWrap = $('chatLoadEarlierWrap'), chatLoadEarlierBtn = $('chatLoadEarlierBtn');
 const chatComposerForm = $('chatComposerForm'), chatShareDayBtn = $('chatShareDayBtn');
 const chatTextInput = $('chatTextInput'), chatSendBtn = $('chatSendBtn');
+const chatVoiceBtn = $('chatVoiceBtn'), chatVoiceBar = $('chatVoiceBar');
+const chatVoiceRecUi = $('chatVoiceRecUi'), chatVoiceTime = $('chatVoiceTime'), chatVoiceCancelBtn = $('chatVoiceCancelBtn'), chatVoiceStopBtn = $('chatVoiceStopBtn');
+const chatVoicePreviewUi = $('chatVoicePreviewUi'), chatVoicePlayBtn = $('chatVoicePlayBtn'), chatVoicePreviewTime = $('chatVoicePreviewTime'), chatVoiceSize = $('chatVoiceSize'), chatVoiceDiscardBtn = $('chatVoiceDiscardBtn'), chatVoiceSendBtn = $('chatVoiceSendBtn');
 
 const statsLoading = $('statsLoading'), statsEmpty = $('statsEmpty'), statsContent = $('statsContent');
 const statAvg = $('statAvg'), statStreak = $('statStreak'), statLongestStreak = $('statLongestStreak'), statCount = $('statCount');
@@ -857,6 +893,11 @@ let activeChatPairId = null;
 let chatMessagesUnsub = null;
 let chatMessageLimit = 40;
 let chatMessagesCache = [];
+let currentlyPlayingVoice = null;
+let voiceStream = null, voiceRecorder = null, voiceChunks = [], voiceStartTs = 0;
+let voiceTimerInt = null, voiceAutoStopTO = null, voiceCancelFlag = false;
+let voiceResult = null; // { base64, mimeType, durationSec } staged in the composer, pending send
+let voicePreviewAudio = null;
 let profileEmojiGridBuilt = false;
 let profileMsgTimeout = null;
 
@@ -963,6 +1004,7 @@ function hideAllScreens() {
 }
 function switchTab(name) {
   if (currentTab === 'chat' && name !== 'chat' && chatMessagesUnsub) {
+    discardAnyPendingVoice();
     chatMessagesUnsub(); chatMessagesUnsub = null; activeChatPairId = null;
   }
   currentOverlay = null;
@@ -1220,8 +1262,8 @@ async function refreshFriendState() {
   incomingRequests = await Promise.all(incoming.map(async f => ({ id: f.id, profile: await getProfile(otherUidOf(f)) })));
   outgoingRequests = await Promise.all(outgoing.map(async f => ({ id: f.id, profile: await getProfile(otherUidOf(f)) })));
 
-  setCountBadge(notifBadge, incomingRequests.length);
   totalUnread = friendsList.reduce((s,f)=>s+(f.unread||0),0);
+  setCountBadge(notifBadge, incomingRequests.length + totalUnread);
   setCountBadge(chatTabBadge, totalUnread);
 
   if (currentOverlay === 'notifications') renderNotificationsScreen();
@@ -2049,11 +2091,43 @@ function buildReactionBar(m) {
   bar.appendChild(addBtn);
   return bar;
 }
+function formatMmSs(totalSec) {
+  const t = Math.max(0, Math.round(totalSec || 0));
+  return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
+}
+function buildVoiceBubbleContent(m) {
+  const row = document.createElement('div'); row.className = 'voice-msg';
+  const playBtn = document.createElement('button'); playBtn.type = 'button'; playBtn.className = 'voice-play-btn'; playBtn.setAttribute('aria-label', 'Play voice note'); playBtn.textContent = '▶';
+  const track = document.createElement('div'); track.className = 'voice-track';
+  const fill = document.createElement('div'); fill.className = 'voice-track-fill';
+  track.appendChild(fill);
+  const time = document.createElement('span'); time.className = 'voice-time'; time.textContent = formatMmSs(m.durationSec);
+  row.appendChild(playBtn); row.appendChild(track); row.appendChild(time);
+  let audioEl = null;
+  playBtn.addEventListener('click', () => {
+    if (!audioEl) {
+      audioEl = new Audio('data:' + (m.audioMimeType || 'audio/webm') + ';base64,' + m.audio);
+      audioEl.addEventListener('timeupdate', () => {
+        const pct = m.durationSec ? Math.min(100, (audioEl.currentTime / m.durationSec) * 100) : 0;
+        fill.style.width = pct + '%';
+      });
+      audioEl.addEventListener('ended', () => { playBtn.textContent = '▶'; fill.style.width = '0%'; if (currentlyPlayingVoice === audioEl) currentlyPlayingVoice = null; });
+    }
+    if (currentlyPlayingVoice && currentlyPlayingVoice !== audioEl) {
+      currentlyPlayingVoice.pause();
+      const otherBtn = currentlyPlayingVoice._playBtn; if (otherBtn) otherBtn.textContent = '▶';
+    }
+    if (audioEl.paused) { audioEl.play().catch(()=>{}); playBtn.textContent = '⏸'; audioEl._playBtn = playBtn; currentlyPlayingVoice = audioEl; }
+    else { audioEl.pause(); playBtn.textContent = '▶'; }
+  });
+  return row;
+}
 function buildMessageEl(m) {
   const mine = m.senderUid === currentUser.uid;
   const wrap = document.createElement('div'); wrap.className = 'msg-row ' + (mine ? 'mine' : 'theirs');
   const bubble = document.createElement('div'); bubble.className = 'msg-bubble' + (m.type === 'day_share' ? ' day-share' : '');
   if (m.type === 'day_share' && m.dayShare) { bubble.innerHTML = buildDayShareCardHtml(m.dayShare); }
+  else if (m.type === 'voice' && m.audio) { bubble.appendChild(buildVoiceBubbleContent(m)); }
   else {
     const p = document.createElement('div'); p.className = 'msg-text'; p.textContent = m.text || '';
     bubble.appendChild(p);
@@ -2095,6 +2169,7 @@ function openChatWith(friendUid) {
   db.collection('friendships').doc(pairId).update({ ['unreadFor.' + currentUser.uid]: 0 }).catch(()=>{});
 
   if (activeChatPairId === pairId && chatMessagesUnsub) return;
+  discardAnyPendingVoice();
   if (chatMessagesUnsub) { chatMessagesUnsub(); chatMessagesUnsub = null; }
   activeChatPairId = pairId;
   chatMessagesList.dataset.rendered = '0';
@@ -2160,6 +2235,18 @@ async function shareDayToChat(entry) {
   await batch.commit();
   playPopSound(); bumpMessagesSent();
 }
+async function sendVoiceMessage(voice) {
+  const pairId = activeChatPairId, friendUid = activeChatFriendUid;
+  const msgRef = db.collection('friendships').doc(pairId).collection('messages').doc();
+  const payload = { type: 'voice', audio: voice.base64, audioMimeType: voice.mimeType, durationSec: voice.durationSec, senderUid: currentUser.uid, senderName: currentProfile.displayName || currentProfile.username, reactions: {}, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+  const batch = db.batch();
+  batch.set(msgRef, payload);
+  const fUpdate = { lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(), lastMessageText: (currentProfile.displayName||currentProfile.username) + ' sent a voice note (' + formatMmSs(voice.durationSec) + ')' };
+  fUpdate['unreadFor.' + friendUid] = firebase.firestore.FieldValue.increment(1);
+  batch.set(db.collection('friendships').doc(pairId), fUpdate, { merge:true });
+  await batch.commit();
+  playPopSound(); bumpMessagesSent();
+}
 chatComposerForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const text = chatTextInput.value.trim();
@@ -2167,6 +2254,131 @@ chatComposerForm.addEventListener('submit', async (e) => {
   chatTextInput.value = '';
   try { await sendChatMessage(text); } catch (err) { chatTextInput.value = text; alert('Could not send — check your connection.'); }
 });
+
+// ===================== VOICE MESSAGES =====================
+const VOICE_MAX_MS = 30000; // hard auto-stop at 30s
+// 32kbps mono opus for ~30s lands around 120-150KB raw / ~160-200KB base64 - inside the
+// 150-250KB target. The hard cap below is a safety net for browsers (e.g. Safari's AAC
+// encoder) that don't honor the requested bitrate; it still leaves the doc well under
+// Firestore's 1 MiB limit once the other small message fields are added.
+const VOICE_MAX_BASE64_BYTES = 350 * 1024;
+const VOICE_MIME_CANDIDATES = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/mpeg'];
+function pickVoiceMimeType() {
+  if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return '';
+  for (const t of VOICE_MIME_CANDIDATES) { try { if (MediaRecorder.isTypeSupported(t)) return t; } catch (e) {} }
+  return '';
+}
+function setComposerMode(mode) { // 'text' | 'recording' | 'preview'
+  const recording = mode === 'recording', preview = mode === 'preview';
+  chatComposerForm.hidden = recording || preview;
+  chatVoiceBar.hidden = !(recording || preview);
+  chatVoiceRecUi.hidden = !recording;
+  chatVoicePreviewUi.hidden = !preview;
+}
+function stopVoiceStreamTracks() { if (voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; } }
+function clearVoiceTimers() {
+  if (voiceTimerInt) { clearInterval(voiceTimerInt); voiceTimerInt = null; }
+  if (voiceAutoStopTO) { clearTimeout(voiceAutoStopTO); voiceAutoStopTO = null; }
+}
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(String(reader.result).split(',')[1] || '');
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+async function startVoiceRecording() {
+  if (!activeChatPairId) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+    alert('Voice notes are not supported in this browser.'); return;
+  }
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
+  catch (e) { alert('Microphone access was blocked. Allow microphone access to record a voice note.'); return; }
+  voiceStream = stream; voiceChunks = []; voiceCancelFlag = false;
+  const mimeType = pickVoiceMimeType();
+  const opts = { audioBitsPerSecond: 32000 };
+  if (mimeType) opts.mimeType = mimeType;
+  try { voiceRecorder = new MediaRecorder(voiceStream, opts); }
+  catch (e) {
+    try { voiceRecorder = new MediaRecorder(voiceStream); }
+    catch (e2) { alert('Could not start recording.'); stopVoiceStreamTracks(); return; }
+  }
+  voiceRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) voiceChunks.push(e.data); };
+  voiceRecorder.onstop = onVoiceRecorderStop;
+  voiceRecorder.start();
+  voiceStartTs = Date.now();
+  setComposerMode('recording');
+  chatVoiceTime.textContent = '0:00';
+  voiceTimerInt = setInterval(() => { chatVoiceTime.textContent = formatMmSs((Date.now() - voiceStartTs) / 1000); }, 200);
+  voiceAutoStopTO = setTimeout(stopVoiceRecording, VOICE_MAX_MS);
+}
+function stopVoiceRecording() {
+  clearVoiceTimers();
+  if (voiceRecorder && voiceRecorder.state !== 'inactive') voiceRecorder.stop();
+}
+function cancelVoiceRecording() {
+  voiceCancelFlag = true;
+  clearVoiceTimers();
+  if (voiceRecorder && voiceRecorder.state !== 'inactive') voiceRecorder.stop();
+  else { stopVoiceStreamTracks(); resetVoiceUi(); }
+}
+async function onVoiceRecorderStop() {
+  stopVoiceStreamTracks();
+  const cancelled = voiceCancelFlag; voiceCancelFlag = false;
+  if (cancelled) { resetVoiceUi(); return; }
+  const durationSec = Math.min(VOICE_MAX_MS / 1000, (Date.now() - voiceStartTs) / 1000);
+  if (voiceChunks.length === 0 || durationSec < 0.5) { resetVoiceUi(); return; }
+  const blob = new Blob(voiceChunks, { type: (voiceRecorder && voiceRecorder.mimeType) || 'audio/webm' });
+  let base64;
+  try { base64 = await blobToBase64(blob); }
+  catch (e) { alert('Could not process the recording.'); resetVoiceUi(); return; }
+  if (base64.length > VOICE_MAX_BASE64_BYTES) {
+    alert('That recording is too large to send (~' + Math.round(base64.length / 1024) + ' KB). Try a shorter voice note.');
+    resetVoiceUi(); return;
+  }
+  voiceResult = { base64, mimeType: blob.type, durationSec: Math.round(durationSec) };
+  chatVoicePreviewTime.textContent = formatMmSs(voiceResult.durationSec);
+  chatVoiceSize.textContent = '~' + Math.round(base64.length / 1024) + ' KB';
+  setComposerMode('preview');
+}
+function resetVoiceUi() {
+  voiceResult = null; voiceChunks = [];
+  if (voicePreviewAudio) { voicePreviewAudio.pause(); if (currentlyPlayingVoice === voicePreviewAudio) currentlyPlayingVoice = null; voicePreviewAudio = null; }
+  chatVoicePlayBtn.textContent = '▶';
+  chatVoiceSendBtn.disabled = false;
+  setComposerMode('text');
+}
+function discardAnyPendingVoice() {
+  if (voiceRecorder && voiceRecorder.state !== 'inactive') cancelVoiceRecording();
+  else if (voiceResult) resetVoiceUi();
+}
+chatVoiceBtn.addEventListener('click', startVoiceRecording);
+chatVoiceCancelBtn.addEventListener('click', cancelVoiceRecording);
+chatVoiceStopBtn.addEventListener('click', stopVoiceRecording);
+chatVoiceDiscardBtn.addEventListener('click', resetVoiceUi);
+chatVoicePlayBtn.addEventListener('click', () => {
+  if (!voiceResult) return;
+  if (!voicePreviewAudio) {
+    voicePreviewAudio = new Audio('data:' + voiceResult.mimeType + ';base64,' + voiceResult.base64);
+    voicePreviewAudio.addEventListener('ended', () => { chatVoicePlayBtn.textContent = '▶'; if (currentlyPlayingVoice === voicePreviewAudio) currentlyPlayingVoice = null; });
+  }
+  if (currentlyPlayingVoice && currentlyPlayingVoice !== voicePreviewAudio) {
+    currentlyPlayingVoice.pause();
+    if (currentlyPlayingVoice._playBtn) currentlyPlayingVoice._playBtn.textContent = '▶';
+  }
+  if (voicePreviewAudio.paused) { voicePreviewAudio.play().catch(()=>{}); chatVoicePlayBtn.textContent = '⏸'; voicePreviewAudio._playBtn = chatVoicePlayBtn; currentlyPlayingVoice = voicePreviewAudio; }
+  else { voicePreviewAudio.pause(); chatVoicePlayBtn.textContent = '▶'; }
+});
+chatVoiceSendBtn.addEventListener('click', async () => {
+  if (!voiceResult || !activeChatPairId) return;
+  const toSend = voiceResult;
+  chatVoiceSendBtn.disabled = true;
+  try { await sendVoiceMessage(toSend); resetVoiceUi(); }
+  catch (err) { alert('Could not send — check your connection.'); chatVoiceSendBtn.disabled = false; }
+});
+
 chatLoadEarlierBtn.addEventListener('click', () => {
   chatMessageLimit += 40;
   const uid = activeChatFriendUid;
