@@ -129,6 +129,9 @@ code { background: var(--bg-2); border: 1px solid var(--line-strong); padding: 1
 
 .count-badge { position: absolute; top: -6px; right: -6px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); line-height: 1; border: 2px solid var(--bg-0); }
 .tab-btn .count-badge { top: -4px; right: 6px; }
+@keyframes badgeAttention { 0%,100% { transform: scale(1); } 30% { transform: scale(1.3); } 60% { transform: scale(1); } 80% { transform: scale(1.15); } }
+.count-badge.pulse { animation: badgeAttention .6s var(--ease-out) 2; }
+@media (prefers-reduced-motion: reduce) { .count-badge.pulse { animation: none; } }
 
 /* ================= app shell ================= */
 .app-bar { display: flex; align-items: center; justify-content: space-between; padding: 4px 2px 18px; }
@@ -169,6 +172,9 @@ code { background: var(--bg-2); border: 1px solid var(--line-strong); padding: 1
 .rating-btn { aspect-ratio: 1; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--bg-2); color: var(--ink-dim); font-family: var(--font-mono); font-weight: 700; font-size: 16px; transition: transform .12s var(--ease-out), background .15s, color .15s, border-color .15s; }
 .rating-btn:hover { border-color: var(--ink-faint); color: var(--ink); transform: translateY(-2px); }
 .rating-btn.selected { background: var(--brand); color: var(--brand-ink); border-color: transparent; transform: translateY(-2px); }
+.rating-btn.selected.rating-rough { background: var(--grade-f); color: #fff; }
+.rating-btn.selected.rating-meh { background: var(--grade-c); color: #fff; }
+.rating-btn.selected.rating-good { background: var(--grade-b); color: #0E1712; }
 .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; }
 .switch-row + .switch-row { border-top: 1px solid var(--line); }
 .switch-text strong { display: block; font-weight: 600; font-size: 13.5px; color: var(--ink); margin-bottom: 2px; }
@@ -202,6 +208,40 @@ code { background: var(--bg-2); border: 1px solid var(--line-strong); padding: 1
 .badge-toast .text strong { font-size: 13.5px; color: var(--grade-a); display: block; }
 @keyframes toastIn { from { opacity: 0; transform: translateY(28px) scale(.85); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes toastOut { to { opacity: 0; transform: translateY(-12px) scale(.94); } }
+
+/* ================= today overview ================= */
+.today-hero-card { padding-bottom: 17px; }
+.today-greeting { font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: 18px; margin-bottom: 11px; }
+.today-stat-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 15px; }
+.today-stat-row .profile-stat-chip strong { color: var(--ink); font-weight: 700; }
+.today-empty-hint { font-size: 12.5px; color: var(--ink-dim); margin-bottom: 15px; line-height: 1.5; }
+.week-strip { display: flex; justify-content: space-between; gap: 4px; }
+.week-strip-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+.week-strip-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--bg-2); border: 1px solid var(--line-strong); flex-shrink: 0; }
+.week-strip-dot.rough { background: color-mix(in srgb, var(--grade-f) 28%, var(--bg-2)); border-color: var(--grade-f); }
+.week-strip-dot.meh { background: color-mix(in srgb, var(--grade-c) 28%, var(--bg-2)); border-color: var(--grade-c); }
+.week-strip-dot.good { background: color-mix(in srgb, var(--grade-b) 28%, var(--bg-2)); border-color: var(--grade-b); }
+.week-strip-dot.amazing { background: color-mix(in srgb, var(--grade-a) 28%, var(--bg-2)); border-color: var(--grade-a); }
+.week-strip-dot.empty { opacity: .38; font-size: 11px; color: var(--ink-faint); }
+.week-strip-dot.pending { border-style: dashed; border-color: var(--brand); color: var(--brand-hi); font-weight: 700; animation: pendingPulse 1.8s ease-in-out infinite; }
+@keyframes pendingPulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 40%, transparent); } 50% { box-shadow: 0 0 0 5px transparent; } }
+.week-strip-day { font-size: 9.5px; color: var(--ink-faint); font-family: var(--font-mono); text-transform: uppercase; }
+.week-strip-cell.is-today .week-strip-day { color: var(--brand-hi); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .week-strip-dot.pending { animation: none; } }
+
+.memory-callout { display: flex; align-items: flex-start; gap: 10px; text-align: left; font-size: 12.5px; color: var(--ink-dim); background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 16px; line-height: 1.5; }
+.memory-callout .memory-icon { font-size: 15px; flex-shrink: 0; }
+.memory-callout b { color: var(--brand-hi); }
+
+.tags-field { margin-bottom: 16px; }
+.tags-field > label { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--ink-dim); margin-bottom: 8px; }
+.field-optional { font-weight: 400; color: var(--ink-faint); font-size: 11px; }
+.tag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px,1fr)); gap: 7px; }
+.tag-chip { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 8px 6px; border-radius: var(--radius-sm); border: 1px solid var(--line-strong); background: var(--bg-2); color: var(--ink-dim); font-size: 11.5px; font-weight: 600; transition: border-color .15s, color .15s, background .15s, transform .12s; }
+.tag-chip:hover { border-color: var(--ink-faint); transform: translateY(-1px); }
+.tag-chip.selected { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 16%, var(--bg-2)); color: var(--ink); }
+.tag-grid.maxed .tag-chip:not(.selected) { opacity: .42; }
+.history-tags { margin-left: 3px; }
 
 /* ================= stats ================= */
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px,1fr)); gap: 10px; margin-bottom: 16px; }
@@ -344,6 +384,18 @@ code { background: var(--bg-2); border: 1px solid var(--line-strong); padding: 1
 .day-share-pick-row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 4px; border-bottom: 1px solid var(--line); background: none; border-left: none; border-right: none; border-top: none; color: var(--ink); text-align: left; }
 .day-share-pick-row:hover { background: rgba(255,255,255,.03); }
 .day-share-pick-row:last-child { border-bottom: none; }
+
+/* ================= incoming message toast ================= */
+.msg-toast-layer { position: fixed; top: max(14px, env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 10001; display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; max-width: 420px; padding: 0 14px; pointer-events: none; }
+.msg-toast { pointer-events: auto; width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 14px 10px 12px; border-radius: var(--radius-sm); background: var(--bg-1); border: 1px solid var(--line-strong); border-left: 3px solid var(--danger); box-shadow: 0 14px 30px rgba(0,0,0,.5); text-align: left; color: var(--ink); animation: msgToastIn .4s var(--ease-spring), msgToastOut .4s ease 4.6s forwards; }
+.msg-toast .avatar-badge { flex-shrink: 0; }
+.msg-toast-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.msg-toast-name { font-weight: 700; font-size: 12.5px; }
+.msg-toast-text { font-size: 11.5px; color: var(--ink-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg-toast-count { flex-shrink: 0; background: var(--danger); color: #fff; font-family: var(--font-mono); font-weight: 700; font-size: 10.5px; min-width: 18px; height: 18px; border-radius: 999px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+@keyframes msgToastIn { from { opacity: 0; transform: translateY(-16px) scale(.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes msgToastOut { to { opacity: 0; transform: translateY(-10px) scale(.96); } }
+@media (prefers-reduced-motion: reduce) { .msg-toast { animation: none; } }
 
 /* ================= profile / settings / notifications / find ================= */
 .profile-header { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 6px 0 6px; }
@@ -491,6 +543,25 @@ footer { text-align: center; color: var(--ink-faint); font-size: 11.5px; padding
 
     <!-- ---- RATE PANEL ---- -->
     <section id="ratePanel" class="panel">
+
+      <!-- ---- TODAY OVERVIEW: greeting, streak/avg/days, week snapshot ---- -->
+      <div class="card today-hero-card" id="todayHeroCard">
+        <div class="today-greeting" id="todayGreeting">Hey</div>
+        <div class="today-stat-row" id="todayStatStrip" hidden>
+          <span class="profile-stat-chip">🔥 <strong id="todayStreakVal">0</strong> day streak</span>
+          <span class="profile-stat-chip">📊 <strong id="todayWeekAvgVal">—</strong> avg this week</span>
+          <span class="profile-stat-chip">🗓️ <strong id="todayDaysVal">0</strong> logged</span>
+        </div>
+        <div class="today-empty-hint" id="todayEmptyHint">Rate today to kick off your streak and start spotting patterns.</div>
+        <div class="week-strip" id="weekStrip"></div>
+      </div>
+
+      <!-- ---- MEMORY CALLOUT: same day, one week ago ---- -->
+      <div class="memory-callout" id="memoryCallout" hidden>
+        <span class="memory-icon">📌</span>
+        <div class="memory-text" id="memoryText"></div>
+      </div>
+
       <div class="card">
         <h2>How shitty was today?<span class="sub" id="rateDateLabel"></span></h2>
         <div class="rate-emoji-display">
@@ -499,6 +570,10 @@ footer { text-align: center; color: var(--ink-faint); font-size: 11.5px; padding
           <span class="grade-tag" id="stampMark">GRADE</span>
         </div>
         <div class="rating-row" id="ratingRow"></div>
+        <div class="field tags-field">
+          <label>What shaped today?<span class="field-optional">(optional, up to 3)</span></label>
+          <div class="tag-grid" id="tagGrid"></div>
+        </div>
         <div class="field note-field">
           <label for="noteInput">Anything to remember about today? (optional)</label>
           <textarea id="noteInput" maxlength="280" placeholder="Optional note…"></textarea>
@@ -800,6 +875,7 @@ footer { text-align: center; color: var(--ink-faint); font-size: 11.5px; padding
 </div>
 
 <div class="badge-toast-layer" id="badgeToastLayer"></div>
+<div class="msg-toast-layer" id="msgToastLayer" aria-live="polite"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.15.0/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.15.0/firebase-auth-compat.min.js"></script>
@@ -809,6 +885,8 @@ footer { text-align: center; color: var(--ink-faint); font-size: 11.5px; padding
 <script>
 (function () {
   "use strict";
+
+const BASE_TITLE = document.title;
 
 function applyTheme(theme) {
   if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
@@ -848,6 +926,22 @@ const BUCKET_META = {
   good:    { label: 'Good (7-8)',     color: '#6E8C7A' },
   amazing: { label: 'Amazing (9-10)', color: '#C9A165' }
 };
+
+const TAG_OPTIONS = [
+  { id:'work',    emoji:'💼', label:'Work' },
+  { id:'sleep',   emoji:'😴', label:'Sleep' },
+  { id:'health',  emoji:'💪', label:'Health' },
+  { id:'social',  emoji:'👥', label:'Social' },
+  { id:'family',  emoji:'👪', label:'Family' },
+  { id:'love',    emoji:'❤️', label:'Love' },
+  { id:'money',   emoji:'💰', label:'Money' },
+  { id:'weather', emoji:'🌦️', label:'Weather' },
+  { id:'travel',  emoji:'✈️', label:'Travel' },
+  { id:'hobby',   emoji:'🎨', label:'Hobby' },
+  { id:'news',    emoji:'📰', label:'News' },
+  { id:'chores',  emoji:'🧹', label:'Chores' }
+];
+const TAG_MAX = 3;
 
 const PHILOSOPHERS = [
   { id:'camus', name:'Albert Camus', url:'https://raw.githubusercontent.com/Jishnuec/shitty-human/master/Profile/Albert%20camus.jpg' },
@@ -890,6 +984,10 @@ const profilePanel = $('profilePanel'), settingsPanel = $('settingsPanel'), noti
 const rateDateLabel = $('rateDateLabel'), bigEmoji = $('bigEmoji'), bigEmojiLabel = $('bigEmojiLabel'), stampMark = $('stampMark');
 const ratingRow = $('ratingRow'), noteInput = $('noteInput'), privacyCheckbox = $('privacyCheckbox'), submitBtn = $('submitBtn');
 const alreadyRatedNote = $('alreadyRatedNote'), reactionCard = $('reactionCard');
+const todayHeroCard = $('todayHeroCard'), todayGreeting = $('todayGreeting'), todayStatStrip = $('todayStatStrip');
+const todayStreakVal = $('todayStreakVal'), todayWeekAvgVal = $('todayWeekAvgVal'), todayDaysVal = $('todayDaysVal'), todayEmptyHint = $('todayEmptyHint');
+const weekStrip = $('weekStrip'), memoryCallout = $('memoryCallout'), memoryText = $('memoryText'), tagGrid = $('tagGrid');
+const msgToastLayer = $('msgToastLayer');
 
 const chatFriendSwitcher = $('chatFriendSwitcher'), chatEmptyState = $('chatEmptyState'), chatContent = $('chatContent');
 const chatHeaderAvatar = $('chatHeaderAvatar'), chatHeaderName = $('chatHeaderName'), chatHeaderSub = $('chatHeaderSub');
@@ -957,6 +1055,7 @@ let auth, db;
 let currentUser = null, currentProfile = null;
 let isSigningUp = false;
 let selectedRating = null;
+let selectedTags = new Set();
 let selectedSignupAvatarId = null;
 let soundEnabled = true;
 let reactionTimeout = null;
@@ -977,6 +1076,8 @@ let incomingRequests = [];
 let outgoingRequests = [];
 let friendshipsUnsub = null;
 let totalUnread = 0;
+let prevUnreadByUid = {};
+let unreadBaselineReady = false;
 
 let activeCompareFriendUid = null;
 let activeChatFriendUid = null;
@@ -1020,6 +1121,26 @@ function nameLabel(profile) {
   return s;
 }
 function setCountBadge(el, n) { if (n > 0) { el.hidden = false; el.textContent = n > 99 ? '99+' : String(n); } else { el.hidden = true; } }
+function pulseBadge(el) { if (!el || el.hidden) return; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
+function updateDocumentTitleForUnread() { document.title = totalUnread > 0 ? '(' + (totalUnread > 99 ? '99+' : totalUnread) + ') ' + BASE_TITLE : BASE_TITLE; }
+function isViewingChatWith(friendUid) { return currentTab === 'chat' && !currentOverlay && activeChatFriendUid === friendUid && !document.hidden; }
+function showMessageToast(friend) {
+  const toast = document.createElement('button');
+  toast.type = 'button'; toast.className = 'msg-toast';
+  toast.innerHTML = '<span class="avatar-badge sm">' + avatarInnerHtml(friend.avatarId) + '</span>' +
+    '<span class="msg-toast-body"><span class="msg-toast-name">' + escapeHtml(friend.displayName || friend.username) + '</span>' +
+    '<span class="msg-toast-text">' + escapeHtml(friend.lastMessageText || 'sent a new message') + '</span></span>' +
+    '<span class="msg-toast-count">' + (friend.unread > 99 ? '99+' : friend.unread) + '</span>';
+  toast.addEventListener('click', () => {
+    toast.remove();
+    currentOverlay = null;
+    activeChatFriendUid = friend.uid;
+    chatMessageLimit = 40;
+    switchTab('chat');
+  });
+  msgToastLayer.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 5000);
+}
 
 // ===================== AVATAR RENDERING (photo avatars) =====================
 function avatarInnerHtml(avatarId) {
@@ -1053,6 +1174,7 @@ function playSadSound() {
 function playNeutralSound() { if (!soundEnabled) return; const ctx = getCtx(); playTone(440, ctx.currentTime, 0.14, 'sine', 0.1); }
 function playBadgeSound() { if (!soundEnabled) return; const ctx = getCtx(); const now = ctx.currentTime; [659.25, 783.99, 987.77, 1318.5].forEach((f,i)=>playTone(f, now+i*0.11, 0.2, 'triangle', 0.14)); }
 function playPopSound() { if (!soundEnabled) return; const ctx = getCtx(); playTone(880, ctx.currentTime, 0.08, 'sine', 0.08); }
+function playIncomingPing() { if (!soundEnabled) return; const ctx = getCtx(); const now = ctx.currentTime; playTone(740, now, 0.09, 'sine', 0.09); playTone(988, now + 0.09, 0.14, 'sine', 0.09); }
 
 function launchConfetti(count) {
   if (reduceMotion) return;
@@ -1356,7 +1478,7 @@ async function refreshFriendState() {
   friendsList = await Promise.all(accepted.map(async f => {
     const p = await getProfile(otherUidOf(f));
     const unread = (f.unreadFor && f.unreadFor[currentUser.uid]) || 0;
-    return Object.assign({ pairId: f.id, unread }, p);
+    return Object.assign({ pairId: f.id, unread, lastMessageText: f.lastMessageText || '' }, p);
   }));
   // Kept reachable only so their chat history can still be opened/read -
   // excluded everywhere else (compare tab, friends list, badge counts).
@@ -1370,6 +1492,18 @@ async function refreshFriendState() {
   totalUnread = friendsList.reduce((s,f)=>s+(f.unread||0),0);
   setCountBadge(notifBadge, incomingRequests.length + totalUnread);
   setCountBadge(chatTabBadge, totalUnread);
+  updateDocumentTitleForUnread();
+
+  if (unreadBaselineReady) {
+    let anyNew = false;
+    friendsList.forEach(f => {
+      const prev = prevUnreadByUid[f.uid] || 0;
+      if (f.unread > prev && !isViewingChatWith(f.uid)) { showMessageToast(f); anyNew = true; }
+    });
+    if (anyNew) { playIncomingPing(); pulseBadge(chatTabBadge); pulseBadge(notifBadge); }
+  }
+  friendsList.forEach(f => { prevUnreadByUid[f.uid] = f.unread; });
+  unreadBaselineReady = true;
 
   if (currentOverlay === 'notifications') renderNotificationsScreen();
   if (currentOverlay === 'profile' && viewingProfileUid === currentUser.uid) renderProfileScreen();
@@ -2371,7 +2505,11 @@ function openChatWith(friendUid) {
   chatKnownMessageIds = new Set();
   chatMessagesUnsub = db.collection('friendships').doc(pairId).collection('messages')
     .orderBy('createdAt','desc').limit(chatMessageLimit)
-    .onSnapshot(snap => { chatMessagesCache = snap.docs.map(d=>Object.assign({id:d.id}, d.data())).reverse(); renderChatMessages(); },
+    .onSnapshot(snap => {
+      chatMessagesCache = snap.docs.map(d=>Object.assign({id:d.id}, d.data())).reverse();
+      renderChatMessages();
+      if (isViewingChatWith(friendUid) && !activeChatEnded) db.collection('friendships').doc(pairId).update({ ['unreadFor.' + currentUser.uid]: 0 }).catch(()=>{});
+    },
     () => { chatMessagesList.innerHTML = '<div class="empty-state">Could not load chat.</div>'; });
 }
 async function loadChatTab() {
