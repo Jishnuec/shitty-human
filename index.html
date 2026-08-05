@@ -301,14 +301,23 @@ code { background: var(--bg-2); border: 1px solid var(--line-strong); padding: 1
 .day-share-note { margin-top: 8px; font-size: 12px; padding: 8px 10px; background: rgba(0,0,0,.2); border-radius: 9px; line-height: 1.4; }
 .msg-row.mine .day-share-note { background: rgba(0,0,0,.12); }
 .day-share-note.muted { font-style: italic; opacity: .75; }
-.voice-msg { display: flex; align-items: center; gap: 9px; min-width: 168px; }
+.voice-msg { display: flex; align-items: center; gap: 8px; min-width: 190px; }
 .voice-play-btn { width: 28px; height: 28px; border-radius: 50%; border: none; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.14); color: inherit; font-size: 11px; padding: 0; }
 .msg-row.mine .voice-play-btn { background: rgba(0,0,0,.18); }
-.voice-track { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.14); position: relative; overflow: hidden; }
-.msg-row.mine .voice-track { background: rgba(0,0,0,.18); }
-.voice-track-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--brand-hi); border-radius: 2px; }
-.msg-row.mine .voice-track-fill { background: var(--brand-ink); opacity: .55; }
+.voice-waveform { position: relative; flex: 1; height: 22px; min-width: 60px; }
+.voice-waveform-bars { position: absolute; inset: 0; display: flex; align-items: center; gap: 2px; }
+.voice-bar { display: block; width: 2px; flex-shrink: 0; border-radius: 1px; background: currentColor; opacity: .35; }
+.voice-waveform-fg .voice-bar { opacity: 1; }
+.msg-row.theirs .voice-waveform-bg { color: var(--ink-dim); }
+.msg-row.theirs .voice-waveform-fg { color: var(--brand-hi); }
+.msg-row.mine .voice-waveform-bg { color: var(--brand-ink); opacity: .5; }
+.msg-row.mine .voice-waveform-fg { color: var(--brand-ink); }
+.voice-waveform-fill { position: absolute; inset: 0; width: 0%; overflow: hidden; }
 .voice-time { font-family: var(--font-mono); font-size: 10.5px; opacity: .85; flex-shrink: 0; }
+.voice-speed-btn { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; flex-shrink: 0; padding: 2px 5px; border-radius: 5px; border: none; background: rgba(255,255,255,.14); color: inherit; }
+.msg-row.mine .voice-speed-btn { background: rgba(0,0,0,.18); }
+.chat-voice-preview .voice-waveform-bg { color: var(--ink-dim); }
+.chat-voice-preview .voice-waveform-fg { color: var(--brand-hi); }
 .msg-reactions { display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap; position: relative; }
 .reaction-pill { font-size: 11px; background: var(--bg-1); border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px 8px; color: var(--ink-dim); }
 .reaction-pill.mine { border-color: var(--brand); color: var(--brand-hi); }
@@ -534,8 +543,11 @@ footer { text-align: center; color: var(--ink-faint); font-size: 11.5px; padding
             </div>
             <div class="chat-voice-preview" id="chatVoicePreviewUi" hidden>
               <button type="button" class="chat-icon-btn" id="chatVoicePlayBtn" aria-label="Play recording">▶</button>
+              <div class="voice-waveform" id="chatVoicePreviewWave">
+                <div class="voice-waveform-bars voice-waveform-bg" id="chatVoicePreviewWaveBg"></div>
+                <div class="voice-waveform-fill" id="chatVoicePreviewWaveFill"><div class="voice-waveform-bars voice-waveform-fg" id="chatVoicePreviewWaveFg"></div></div>
+              </div>
               <span class="chat-voice-time" id="chatVoicePreviewTime">0:00</span>
-              <span class="chat-voice-hint" id="chatVoiceSize"></span>
               <button type="button" class="chat-icon-btn chat-voice-cancel" id="chatVoiceDiscardBtn" aria-label="Discard recording" title="Discard">🗑</button>
               <button type="button" class="chat-send-btn" id="chatVoiceSendBtn">Send</button>
             </div>
@@ -888,7 +900,8 @@ const chatVoiceBtn = $('chatVoiceBtn'), chatVoiceBar = $('chatVoiceBar');
 const chatVoiceRecUi = $('chatVoiceRecUi'), chatVoiceTime = $('chatVoiceTime'), chatVoiceCancelBtn = $('chatVoiceCancelBtn'), chatVoiceStopBtn = $('chatVoiceStopBtn');
 const chatEndedNotice = $('chatEndedNotice'), chatEndedResendBtn = $('chatEndedResendBtn');
 let activeChatEnded = false;
-const chatVoicePreviewUi = $('chatVoicePreviewUi'), chatVoicePlayBtn = $('chatVoicePlayBtn'), chatVoicePreviewTime = $('chatVoicePreviewTime'), chatVoiceSize = $('chatVoiceSize'), chatVoiceDiscardBtn = $('chatVoiceDiscardBtn'), chatVoiceSendBtn = $('chatVoiceSendBtn');
+const chatVoicePreviewUi = $('chatVoicePreviewUi'), chatVoicePlayBtn = $('chatVoicePlayBtn'), chatVoicePreviewTime = $('chatVoicePreviewTime'), chatVoiceDiscardBtn = $('chatVoiceDiscardBtn'), chatVoiceSendBtn = $('chatVoiceSendBtn');
+const chatVoicePreviewWaveBg = $('chatVoicePreviewWaveBg'), chatVoicePreviewWaveFg = $('chatVoicePreviewWaveFg'), chatVoicePreviewWaveFill = $('chatVoicePreviewWaveFill');
 
 const statsLoading = $('statsLoading'), statsEmpty = $('statsEmpty'), statsContent = $('statsContent');
 const statAvg = $('statAvg'), statStreak = $('statStreak'), statLongestStreak = $('statLongestStreak'), statCount = $('statCount');
@@ -2209,23 +2222,77 @@ function formatMmSs(totalSec) {
   const t = Math.max(0, Math.round(totalSec || 0));
   return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
 }
+// ---- voice waveform: decode real peaks once per clip via Web Audio, cache them ----
+const WAVEFORM_BARS = 32;
+const voiceWaveformCache = new Map(); // cache key -> peaks[]
+let sharedDecodeCtx = null;
+function getDecodeCtx() {
+  if (!sharedDecodeCtx) sharedDecodeCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return sharedDecodeCtx;
+}
+function base64ToArrayBuffer(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+async function decodeWaveformPeaks(base64) {
+  try {
+    const audioBuffer = await getDecodeCtx().decodeAudioData(base64ToArrayBuffer(base64));
+    const raw = audioBuffer.getChannelData(0);
+    const perBucket = Math.max(1, Math.floor(raw.length / WAVEFORM_BARS));
+    const peaks = [];
+    for (let i = 0; i < WAVEFORM_BARS; i++) {
+      let max = 0;
+      const start = i * perBucket;
+      for (let j = 0; j < perBucket; j++) { const v = Math.abs(raw[start + j] || 0); if (v > max) max = v; }
+      peaks.push(max);
+    }
+    const loudest = Math.max.apply(null, peaks.concat([0.02]));
+    return peaks.map(p => Math.max(0.14, Math.min(1, p / loudest)));
+  } catch (e) { return new Array(WAVEFORM_BARS).fill(0.4); } // decode unsupported/failed - flat fallback
+}
+function waveformBarsHtml(peaks) {
+  return peaks.map(p => '<span class="voice-bar" style="height:' + Math.round(p * 22) + 'px"></span>').join('');
+}
+function paintWaveform(bgEl, fgEl, peaks) { bgEl.innerHTML = waveformBarsHtml(peaks); fgEl.innerHTML = waveformBarsHtml(peaks); }
+function loadWaveformInto(base64, cacheKey, bgEl, fgEl) {
+  if (voiceWaveformCache.has(cacheKey)) { paintWaveform(bgEl, fgEl, voiceWaveformCache.get(cacheKey)); return; }
+  decodeWaveformPeaks(base64).then(peaks => {
+    voiceWaveformCache.set(cacheKey, peaks);
+    if (document.body.contains(bgEl)) paintWaveform(bgEl, fgEl, peaks);
+  });
+}
 function buildVoiceBubbleContent(m) {
   const row = document.createElement('div'); row.className = 'voice-msg';
   const playBtn = document.createElement('button'); playBtn.type = 'button'; playBtn.className = 'voice-play-btn'; playBtn.setAttribute('aria-label', 'Play voice note'); playBtn.textContent = '▶';
-  const track = document.createElement('div'); track.className = 'voice-track';
-  const fill = document.createElement('div'); fill.className = 'voice-track-fill';
-  track.appendChild(fill);
+  const waveWrap = document.createElement('div'); waveWrap.className = 'voice-waveform';
+  const bg = document.createElement('div'); bg.className = 'voice-waveform-bars voice-waveform-bg';
+  const fillWrap = document.createElement('div'); fillWrap.className = 'voice-waveform-fill';
+  const fg = document.createElement('div'); fg.className = 'voice-waveform-bars voice-waveform-fg';
+  fillWrap.appendChild(fg); waveWrap.appendChild(bg); waveWrap.appendChild(fillWrap);
+  paintWaveform(bg, fg, new Array(WAVEFORM_BARS).fill(0.35));
+  loadWaveformInto(m.audio, m.id || m.audio.slice(0, 24), bg, fg);
   const time = document.createElement('span'); time.className = 'voice-time'; time.textContent = formatMmSs(m.durationSec);
-  row.appendChild(playBtn); row.appendChild(track); row.appendChild(time);
+  const speedBtn = document.createElement('button'); speedBtn.type = 'button'; speedBtn.className = 'voice-speed-btn'; speedBtn.textContent = '1x'; speedBtn.setAttribute('aria-label', 'Playback speed');
+  row.appendChild(playBtn); row.appendChild(waveWrap); row.appendChild(time); row.appendChild(speedBtn);
+  const speeds = [1, 1.5, 2]; let speedIdx = 0;
   let audioEl = null;
+  speedBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    speedIdx = (speedIdx + 1) % speeds.length;
+    speedBtn.textContent = speeds[speedIdx] + 'x';
+    if (audioEl) audioEl.playbackRate = speeds[speedIdx];
+  });
   playBtn.addEventListener('click', () => {
     if (!audioEl) {
       audioEl = new Audio('data:' + (m.audioMimeType || 'audio/webm') + ';base64,' + m.audio);
+      audioEl.playbackRate = speeds[speedIdx];
       audioEl.addEventListener('timeupdate', () => {
         const pct = m.durationSec ? Math.min(100, (audioEl.currentTime / m.durationSec) * 100) : 0;
-        fill.style.width = pct + '%';
+        fillWrap.style.width = pct + '%';
       });
-      audioEl.addEventListener('ended', () => { playBtn.textContent = '▶'; fill.style.width = '0%'; if (currentlyPlayingVoice === audioEl) currentlyPlayingVoice = null; });
+      audioEl.addEventListener('ended', () => { playBtn.textContent = '▶'; fillWrap.style.width = '0%'; if (currentlyPlayingVoice === audioEl) currentlyPlayingVoice = null; });
     }
     if (currentlyPlayingVoice && currentlyPlayingVoice !== audioEl) {
       currentlyPlayingVoice.pause();
@@ -2471,13 +2538,16 @@ async function onVoiceRecorderStop() {
   }
   voiceResult = { base64, mimeType: blob.type, durationSec: Math.round(durationSec) };
   chatVoicePreviewTime.textContent = formatMmSs(voiceResult.durationSec);
-  chatVoiceSize.textContent = '~' + Math.round(base64.length / 1024) + ' KB';
+  paintWaveform(chatVoicePreviewWaveBg, chatVoicePreviewWaveFg, new Array(WAVEFORM_BARS).fill(0.35));
+  chatVoicePreviewWaveFill.style.width = '0%';
+  loadWaveformInto(base64, 'preview:' + base64.slice(0, 24), chatVoicePreviewWaveBg, chatVoicePreviewWaveFg);
   setComposerMode('preview');
 }
 function resetVoiceUi() {
   voiceResult = null; voiceChunks = [];
   if (voicePreviewAudio) { voicePreviewAudio.pause(); if (currentlyPlayingVoice === voicePreviewAudio) currentlyPlayingVoice = null; voicePreviewAudio = null; }
   chatVoicePlayBtn.textContent = '▶';
+  chatVoicePreviewWaveFill.style.width = '0%';
   chatVoiceSendBtn.disabled = false;
   setComposerMode(activeChatEnded ? 'ended' : 'text');
 }
@@ -2493,7 +2563,11 @@ chatVoicePlayBtn.addEventListener('click', () => {
   if (!voiceResult) return;
   if (!voicePreviewAudio) {
     voicePreviewAudio = new Audio('data:' + voiceResult.mimeType + ';base64,' + voiceResult.base64);
-    voicePreviewAudio.addEventListener('ended', () => { chatVoicePlayBtn.textContent = '▶'; if (currentlyPlayingVoice === voicePreviewAudio) currentlyPlayingVoice = null; });
+    voicePreviewAudio.addEventListener('timeupdate', () => {
+      const pct = voiceResult && voiceResult.durationSec ? Math.min(100, (voicePreviewAudio.currentTime / voiceResult.durationSec) * 100) : 0;
+      chatVoicePreviewWaveFill.style.width = pct + '%';
+    });
+    voicePreviewAudio.addEventListener('ended', () => { chatVoicePlayBtn.textContent = '▶'; chatVoicePreviewWaveFill.style.width = '0%'; if (currentlyPlayingVoice === voicePreviewAudio) currentlyPlayingVoice = null; });
   }
   if (currentlyPlayingVoice && currentlyPlayingVoice !== voicePreviewAudio) {
     currentlyPlayingVoice.pause();
