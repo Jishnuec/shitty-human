@@ -571,7 +571,7 @@ footer { text-align: center; color: var(--ink-faint); font-size: 11.5px; padding
         </div>
         <div class="rating-row" id="ratingRow"></div>
         <div class="field tags-field">
-          <label>What shaped today?<span class="field-optional">(optional, up to 3)</span></label>
+          <label>What shaped today? <span class="field-optional">(optional, up to 3)</span></label>
           <div class="tag-grid" id="tagGrid"></div>
         </div>
         <div class="field note-field">
@@ -1826,20 +1826,18 @@ function renderNotificationsScreen() {
     unreadFriends.forEach(f => {
       chatSection.appendChild(friendRowEl(f.avatarId, (f.displayName || f.username) + ' (' + f.unread + ' new)', (actions) => {
         const chatBtn = document.createElement('button'); chatBtn.type='button'; chatBtn.className='btn-chip'; chatBtn.textContent='Chat';
-        chatBtn.addEventListener('click', () => { 
-          closeOverlay(); 
-          switchTab('chat'); 
-          activeChatFriendUid = f.uid; 
-          chatMessageLimit = 40; 
-          openChatWith(f.uid); 
+        chatBtn.addEventListener('click', () => {
+          currentOverlay = null;
+          activeChatFriendUid = f.uid;
+          chatMessageLimit = 40;
+          switchTab('chat');
         });
         actions.appendChild(chatBtn);
-      }, () => { 
-        closeOverlay(); 
-        switchTab('chat'); 
-        activeChatFriendUid = f.uid; 
-        chatMessageLimit = 40; 
-        openChatWith(f.uid); 
+      }, () => {
+        currentOverlay = null;
+        activeChatFriendUid = f.uid;
+        chatMessageLimit = 40;
+        switchTab('chat');
       }));
     });
     list.appendChild(chatSection);
@@ -1914,12 +1912,100 @@ for (let i = 1; i <= 10; i++) {
 const ratingButtons = Array.from(document.querySelectorAll('.rating-btn'));
 function selectRating(n) {
   selectedRating = n;
-  ratingButtons.forEach(b => b.classList.toggle('selected', Number(b.dataset.value) === n));
+  ratingButtons.forEach(b => {
+    const isSel = Number(b.dataset.value) === n;
+    b.classList.toggle('selected', isSel);
+    b.classList.remove('rating-rough', 'rating-meh', 'rating-good');
+    if (isSel && n) { const bucket = bucketFor(n); if (bucket !== 'amazing') b.classList.add('rating-' + bucket); }
+  });
   if (n) {
     bigEmoji.textContent = EMOJI_BY_RATING[n]; bigEmojiLabel.textContent = n + ' — ' + LABEL_BY_RATING[n];
     bigEmoji.classList.remove('pop'); void bigEmoji.offsetWidth; bigEmoji.classList.add('pop');
   } else { bigEmoji.textContent = '❓'; bigEmojiLabel.textContent = 'Pick a number below'; }
   submitBtn.disabled = !n;
+}
+const MAX_TAGS = TAG_MAX;
+TAG_OPTIONS.forEach(t => {
+  const chip = document.createElement('button');
+  chip.type = 'button'; chip.className = 'tag-chip'; chip.dataset.id = t.id;
+  chip.innerHTML = '<span>' + t.emoji + '</span><span>' + t.label + '</span>';
+  chip.addEventListener('click', () => {
+    if (selectedTags.has(t.id)) { selectedTags.delete(t.id); }
+    else {
+      if (selectedTags.size >= MAX_TAGS) { triggerShake(chip); return; }
+      selectedTags.add(t.id);
+    }
+    renderTagSelection();
+  });
+  tagGrid.appendChild(chip);
+});
+function renderTagSelection() {
+  tagGrid.classList.toggle('maxed', selectedTags.size >= MAX_TAGS);
+  Array.from(tagGrid.children).forEach(chip => chip.classList.toggle('selected', selectedTags.has(chip.dataset.id)));
+}
+function setSelectedTags(ids) {
+  selectedTags = new Set((ids || []).filter(id => TAG_OPTIONS.some(t => t.id === id)).slice(0, MAX_TAGS));
+  renderTagSelection();
+}
+function greetingForHour(h) {
+  if (h < 5) return 'Still up?';
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  if (h < 21) return 'Good evening';
+  return 'Good night';
+}
+function firstNameOf(profile) { return ((profile && (profile.displayName || profile.username)) || '').split(' ')[0]; }
+function daysAgoDateStr(n) { const d = new Date(); d.setDate(d.getDate() - n); return toDateStr(d); }
+function renderWeekStrip(entries) {
+  const map = {}; entries.forEach(e => map[e.date] = e);
+  const today = new Date(); today.setHours(0,0,0,0);
+  weekStrip.innerHTML = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const ds = toDateStr(d);
+    const isToday = i === 0;
+    const entry = map[ds];
+    const cell = document.createElement('div');
+    cell.className = 'week-strip-cell' + (isToday ? ' is-today' : '');
+    const dot = document.createElement('span');
+    if (entry) {
+      dot.className = 'week-strip-dot ' + bucketFor(entry.rating);
+      dot.textContent = EMOJI_BY_RATING[entry.rating];
+      cell.title = (isToday ? 'Today' : formatDate(ds)) + ' — ' + entry.rating + '/10';
+    } else if (isToday) {
+      dot.className = 'week-strip-dot pending'; dot.textContent = '?';
+      cell.title = 'Today — not rated yet';
+    } else {
+      dot.className = 'week-strip-dot empty'; dot.textContent = '–';
+      cell.title = formatDate(ds) + ' — not rated';
+    }
+    const label = document.createElement('span');
+    label.className = 'week-strip-day'; label.textContent = WEEKDAY_NAMES[d.getDay()].slice(0,1);
+    cell.appendChild(dot); cell.appendChild(label);
+    weekStrip.appendChild(cell);
+  }
+}
+function renderTodayHero() {
+  const entries = myEntries;
+  const hasHistory = entries.length > 0;
+  todayGreeting.textContent = greetingForHour(new Date().getHours()) + (currentProfile ? ', ' + firstNameOf(currentProfile) : '');
+  todayStatStrip.hidden = !hasHistory;
+  todayEmptyHint.hidden = hasHistory;
+  if (hasHistory) {
+    todayStreakVal.textContent = computeStreak(entries);
+    const weekAvg = avgLastNDays(entries, 7);
+    todayWeekAvgVal.textContent = weekAvg ? weekAvg.toFixed(1) : '—';
+    todayDaysVal.textContent = (currentProfile && currentProfile.daysLoggedCount) || entries.length;
+  }
+  renderWeekStrip(entries);
+  const memory = entries.find(e => e.date === daysAgoDateStr(7));
+  if (memory) {
+    memoryCallout.hidden = false;
+    memoryText.innerHTML = 'A week ago today you rated it <b>' + memory.rating + '/10</b> ' + EMOJI_BY_RATING[memory.rating] +
+      (memory.note ? ' — “' + escapeHtml(memory.note.slice(0,80)) + (memory.note.length > 80 ? '…' : '') + '”' : '');
+  } else {
+    memoryCallout.hidden = true;
+  }
 }
 async function loadRateTab() {
   rateDateLabel.textContent = new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
@@ -1929,12 +2015,16 @@ async function loadRateTab() {
   if (snap.exists) {
     const data = snap.data();
     selectRating(data.rating); noteInput.value = data.note || ''; privacyCheckbox.checked = !!data.private;
+    setSelectedTags(data.tags || []);
     submitBtn.textContent = "Update today's shittiness"; alreadyRatedNote.hidden = false;
   } else {
     selectRating(null); noteInput.value = ''; privacyCheckbox.checked = false;
+    setSelectedTags([]);
     submitBtn.textContent = "Log today's shittiness"; alreadyRatedNote.hidden = true;
   }
   reactionCard.classList.remove('show'); stampMark.classList.remove('show');
+  await fetchMyEntries(false);
+  renderTodayHero();
 }
 submitBtn.addEventListener('click', async () => {
   if (!selectedRating) return;
@@ -1942,7 +2032,7 @@ submitBtn.addEventListener('click', async () => {
   const today = todayStr();
   const docId = currentUser.uid + '_' + today;
   const isPrivate = privacyCheckbox.checked;
-  const payload = { uid: currentUser.uid, username: currentProfile.username, date: today, rating: selectedRating, note: noteInput.value.trim().slice(0,280), private: isPrivate, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+  const payload = { uid: currentUser.uid, username: currentProfile.username, date: today, rating: selectedRating, note: noteInput.value.trim().slice(0,280), private: isPrivate, tags: Array.from(selectedTags), updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
   const isNewDay = !todayDocExists;
   if (isNewDay) { payload.ratedAtHour = new Date().getHours(); payload.createdAt = firebase.firestore.FieldValue.serverTimestamp(); }
   try {
@@ -1955,6 +2045,7 @@ submitBtn.addEventListener('click', async () => {
     celebrateRating(selectedRating);
     submitBtn.textContent = "Update today's shittiness"; alreadyRatedNote.hidden = false;
     await fetchMyEntries(true);
+    renderTodayHero();
   } catch (err) { alert('Could not save your rating — check your connection and try again.'); }
   submitBtn.disabled = false;
 });
@@ -2240,7 +2331,8 @@ async function loadStatsTab() {
   entries.slice().reverse().forEach(e => {
     const li = document.createElement('li'); li.className = 'history-item';
     li.innerHTML = '<span class="history-emoji">' + EMOJI_BY_RATING[e.rating] + '</span>' +
-      '<span class="history-main"><span class="history-date">' + formatDate(e.date) + (e.private ? ' 🔒' : '') + '</span>' +
+      '<span class="history-main"><span class="history-date">' + formatDate(e.date) + (e.private ? ' 🔒' : '') +
+      (e.tags && e.tags.length ? ' <span class="history-tags">' + e.tags.map(id => { const t = TAG_OPTIONS.find(x => x.id === id); return t ? t.emoji : ''; }).join('') + '</span>' : '') + '</span>' +
       (e.note ? '<span class="history-note">' + escapeHtml(e.note) + '</span>' : '') + '</span>' +
       '<span class="history-rating">' + e.rating + '</span>';
     historyList.appendChild(li);
